@@ -1,0 +1,49 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.2.30'
+
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+}
+
+apply plugin: 'application'
+apply plugin: 'idea'
+
+group 'com.github.fdeitylink'
+version '0.0.1'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://jitpack.io'}
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre8"
+
+    implementation 'no.tornado:tornadofx:1.7.14'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+mainClassName = 'io.fdeitylink.kero.edit.app.MyApp'
+
+jar {
+    manifest {
+        attributes(
+                'Manifest-Version': '1.0',
+                'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+                'Main-Class': mainClassName
+        )
+    }
+    from(configurations.compile.collect { entry -> zipTree(entry) }) {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+    }
+}

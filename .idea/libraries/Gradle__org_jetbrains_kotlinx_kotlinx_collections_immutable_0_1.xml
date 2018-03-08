@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.jetbrains.kotlinx:kotlinx-collections-immutable:0.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-collections-immutable/0.1/46c8113e29139d3ec4316ced50c7917e22e05e02/kotlinx-collections-immutable-0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-collections-immutable/0.1/71c3937bd7d623acb56ac4875d608456d6609f6d/kotlinx-collections-immutable-0.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

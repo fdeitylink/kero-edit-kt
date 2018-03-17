@@ -133,3 +133,16 @@ private inline fun <reified T : Name> Name.Companion.fromChannel(chan: ReadableB
             validate(it.isValidName()) { "$type name is invalid (name: $it)" }
             ctor(it)
         }
+
+private fun String.Companion.fromChannel(chan: ReadableByteChannel): String {
+    val len = ByteBuffer.allocate(1).let {
+        chan.read(it)
+        it.flip()
+        it.get().toUInt()
+    }
+
+    return ByteBuffer.allocate(len).let {
+        chan.read(it)
+        String.fromBytes(it.array())
+    }
+}

@@ -2,6 +2,8 @@ package io.fdeitylink.kero.map
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
+import kotlinx.collections.immutable.toImmutableList
+
 import io.fdeitylink.util.enumMapOf
 
 /**
@@ -31,6 +33,13 @@ internal data class PxPack(
         require(units.size <= PxUnit.MAXIMUM_NUMBER_OF_UNITS)
         { "number of units cannot exceed ${PxUnit.MAXIMUM_NUMBER_OF_UNITS} (size: ${units.size})" }
     }
+
+    constructor(
+            head: Head = Head(),
+            layers: Map<TileLayer.Type, TileLayer> =
+                    enumMapOf(*TileLayer.Type.values().map { Pair(it, TileLayer()) }.toTypedArray()),
+            units: List<PxUnit> = immutableListOf()
+    ) : this(head, layers, units.toImmutableList())
 
     companion object
 }

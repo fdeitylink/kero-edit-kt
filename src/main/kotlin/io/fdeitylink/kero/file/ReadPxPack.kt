@@ -16,6 +16,8 @@ import io.fdeitylink.util.toUInt
 import io.fdeitylink.util.Quadruple
 import io.fdeitylink.util.Quintuple
 
+import io.fdeitylink.kero.CHARSET
+
 import io.fdeitylink.kero.map.PxPack
 import io.fdeitylink.kero.map.Head
 import io.fdeitylink.kero.map.BackgroundColor
@@ -25,12 +27,7 @@ import io.fdeitylink.kero.map.ScrollType
 import io.fdeitylink.kero.map.TileLayer
 import io.fdeitylink.kero.map.PxUnit
 
-import io.fdeitylink.kero.Name
-import io.fdeitylink.kero.MapName
-import io.fdeitylink.kero.SpritesheetName
-import io.fdeitylink.kero.TilesetName
-import io.fdeitylink.kero.UnitName
-import io.fdeitylink.kero.isValidName
+import io.fdeitylink.kero.validateName
 
 internal fun PxPack.Companion.fromChannel(chan: SeekableByteChannel): PxPack {
     val head = Head.fromChannel(chan)
@@ -51,12 +48,12 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
     validateHeader(chan, HEADER_STRING, "PxPack")
 
     val desc = String.fromChannel(chan)
-    validate(desc.length <= MAXIMUM_DESCRIPTION_LENGTH) { "description is too long (desc: $desc)" }
+    validate(desc.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_LENGTH) { "description is too long (desc: $desc)" }
 
-    val maps = List(NUMBER_OF_REFERENCED_MAPS) { Name.fromChannel(chan, ::MapName) }
+    val maps = List(NUMBER_OF_REFERENCED_MAPS) { nameFromChannel(chan, "map") }
             .let { (first, second, third, fourth) -> Quadruple(first, second, third, fourth) }
 
-    val spritesheet = Name.fromChannel(chan, ::SpritesheetName)
+    val spritesheet = nameFromChannel(chan, "spritesheet")
 
     val unknownBytes = ByteBuffer.allocate(5).let {
         chan.read(it)
@@ -71,7 +68,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
 
     val layerProperties = EnumMap<TileLayer.Type, LayerProperties>(TileLayer.Type::class.java).also { map ->
         TileLayer.Type.values().forEach {
-            val tileset = Name.fromChannel(chan, ::TilesetName)
+            val tileset = nameFromChannel(chan, "tileset")
 
             val (visibilityType, scrollType) = ByteBuffer.allocate(2).let {
                 chan.read(it)
@@ -122,17 +119,13 @@ private fun PxUnit.Companion.fromChannel(chan: SeekableByteChannel) =
 
             val unknownBytes = Pair(it.get(), it.get())
 
-            val name = Name.fromChannel(chan, ::UnitName)
+            val name = nameFromChannel(chan, "unit")
 
             PxUnit(flag, type, unknownByte, x, y, unknownBytes, name)
         }
 
-private inline fun <reified T : Name> Name.Companion.fromChannel(chan: ReadableByteChannel, ctor: (String) -> T) =
-        String.fromChannel(chan).let {
-            val type = T::class.simpleName!!.toLowerCase().removeSuffix("name")
-            validate(it.isValidName()) { "$type name is invalid (name: $it)" }
-            ctor(it)
-        }
+private fun nameFromChannel(chan: ReadableByteChannel, type: String) =
+        String.fromChannel(chan).also { it.validateName(type) }
 
 private fun String.Companion.fromChannel(chan: ReadableByteChannel): String {
     val len = ByteBuffer.allocate(1).let {

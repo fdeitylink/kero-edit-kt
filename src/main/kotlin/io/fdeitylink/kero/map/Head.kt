@@ -2,12 +2,10 @@ package io.fdeitylink.kero.map
 
 import java.util.EnumMap
 
+import io.fdeitylink.kero.validateName
+
 import io.fdeitylink.util.Quintuple
 import io.fdeitylink.util.Quadruple
-
-import io.fdeitylink.kero.MapName
-import io.fdeitylink.kero.SpritesheetName
-import io.fdeitylink.kero.TilesetName
 
 /**
  * Represents the head of a PxPack map
@@ -23,13 +21,12 @@ internal data class Head(
         /**
          * A set of up to four maps referenced by this PxPack map
          */
-        val maps: Quadruple<MapName, MapName, MapName, MapName> =
-                Quadruple(MapName(""), MapName(""), MapName(""), MapName("")),
+        val maps: Quadruple<String, String, String, String> = Quadruple("", "", "", ""),
 
         /**
          * The spritesheet used for rendering the [units][PxUnit] of this PxPack map
          */
-        val spritesheet: SpritesheetName = SpritesheetName(""),
+        val spritesheet: String = "",
 
         /**
          * A set of five bytes whose purpose is unknown
@@ -47,7 +44,7 @@ internal data class Head(
         val layerProperties: Map<TileLayer.Type, LayerProperties> =
                 EnumMap<TileLayer.Type, LayerProperties>(TileLayer.Type::class.java).also {
                     it[TileLayer.Type.BACKGROUND] = LayerProperties()
-                    it[TileLayer.Type.MIDDLEGROUND] = LayerProperties(TilesetName(""))
+                    it[TileLayer.Type.MIDDLEGROUND] = LayerProperties(tileset = "")
                     it[TileLayer.Type.FOREGROUND] = LayerProperties(scrollType = ScrollType.THREE_FOURTHS)
                 }
 ) {
@@ -55,9 +52,12 @@ internal data class Head(
         require(description.length <= MAXIMUM_DESCRIPTION_LENGTH)
         { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
 
+        maps.let { (a, b, c, d) -> listOf(a, b, c, d).forEach { it.validateName("map") } }
+        spritesheet.validateName("spritesheet")
+
         require(layerProperties.size == TileLayer.NUMBER_OF_TILE_LAYERS)
         { "layerProperties.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerProperties.size})" }
-        require(layerProperties[TileLayer.Type.BACKGROUND]!!.tileset.name.isNotEmpty())
+        require(layerProperties[TileLayer.Type.BACKGROUND]!!.tileset.isNotEmpty())
         { "background tileset name may not be empty" }
     }
 
@@ -114,7 +114,7 @@ internal data class LayerProperties(
         /**
          * The name of the tileset used to display a tile layer in a PxPack map
          */
-        val tileset: TilesetName = TilesetName("mpt00"),
+        val tileset: String = "mpt00",
 
         /**
          * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack map
@@ -127,7 +127,11 @@ internal data class LayerProperties(
          * The type of scrolling used to display a tile layer in a PxPack map
          */
         val scrollType: ScrollType = ScrollType.NORMAL
-)
+) {
+    init {
+        tileset.validateName("tileset")
+    }
+}
 
 /**
  * Potentially represents some kind of visibility setting for a tile layer in a PxPack map.

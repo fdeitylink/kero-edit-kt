@@ -1,6 +1,6 @@
 package io.fdeitylink.kero.map
 
-import io.fdeitylink.kero.UnitName
+import io.fdeitylink.kero.validateName
 
 /**
  * Represents an individual unit in a PxPack map
@@ -47,13 +47,15 @@ internal data class PxUnit(
         /**
          * The name of this unit, for use in scripts
          */
-        val name: UnitName
+        val name: String
 ) {
     // Currently investigating the requirements - unittype.txt lists 175 units but a unit in 00title has type 177
-    /*init {
+    init {
+        name.validateName("unit")
+
         require(type.toUInt() in 0 until NUMBER_OF_UNIT_TYPES)
         { "type must be in range 0 - $NUMBER_OF_UNIT_TYPES (type: $type)" }
-    }*/
+    }
 
     companion object {
         /**

@@ -27,18 +27,18 @@ internal fun PxPack.toBytes() =
  * This does not comprise a fully valid PxPack file, just part of it.
  */
 private fun Head.toBytes(): ByteArray {
-    fun LayerProperties.toBytes() = tileset.name.toBytes() + visibilityType.type + scrollType.byte
+    fun LayerProperties.toBytes() = tileset.toBytes() + visibilityType.type + scrollType.byte
 
     return Head.HEADER_STRING.toByteArray() +
 
            description.toBytes() +
 
-           maps.first.name.toBytes() +
-           maps.second.name.toBytes() +
-           maps.third.name.toBytes() +
-           maps.fourth.name.toBytes() +
+           maps.first.toBytes() +
+           maps.second.toBytes() +
+           maps.third.toBytes() +
+           maps.fourth.toBytes() +
 
-           spritesheet.name.toBytes() +
+           spritesheet.toBytes() +
 
            unknownBytes.first +
            unknownBytes.second +
@@ -87,7 +87,7 @@ private fun PxUnit.toBytes() =
         y.toBytes() +
         unknownBytes.first +
         unknownBytes.second +
-        name.toString().toBytes()
+        name.toBytes()
 
 /**
  * Converts a [String] into an SJIS-encoded [ByteArray], with its length in bytes placed at the head of the array

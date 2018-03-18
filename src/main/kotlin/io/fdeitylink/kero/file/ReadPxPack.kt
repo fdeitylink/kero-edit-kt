@@ -107,7 +107,7 @@ private fun PxUnit.Companion.fromChannel(chan: SeekableByteChannel) =
             chan.read(it)
             it.flip()
 
-            val flag = it.get()
+            val flags = it.get()
             val type = it.get()
             val unknownByte = it.get()
 
@@ -118,7 +118,7 @@ private fun PxUnit.Companion.fromChannel(chan: SeekableByteChannel) =
 
             val name = nameFromChannel(chan, "unit")
 
-            PxUnit(flag, type, unknownByte, x, y, unknownBytes, name)
+            PxUnit(flags, type, unknownByte, x, y, unknownBytes, name)
         }
 
 private fun nameFromChannel(chan: ReadableByteChannel, type: String) =

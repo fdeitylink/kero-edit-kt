@@ -9,7 +9,7 @@ internal data class PxUnit(
         /**
          * Potentially represents a set of flags for this unit
          */
-        val flag: Byte,
+        val flags: Byte,
 
         /**
          * Represents the specific type of this unit

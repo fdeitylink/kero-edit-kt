@@ -84,8 +84,8 @@ private fun PxUnit.toBytes() =
                 type.toByte(),
                 unknownByte
         ) +
-        x.toBytes() +
-        y.toBytes() +
+        x.toShort().toBytes() +
+        y.toShort().toBytes() +
         unknownBytes.first +
         unknownBytes.second +
         name.toBytes()

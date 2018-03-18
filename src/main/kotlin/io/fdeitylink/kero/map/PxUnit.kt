@@ -26,17 +26,13 @@ internal data class PxUnit(
 
         /**
          * The x-coordinate of this unit in a PxPack map
-         *
-         * Though [Short] is signed, this value is really unsigned, so upcast to an [Int] as necessary.
          */
-        val x: Short,
+        val x: Int,
 
         /**
          * The y-coordinate of this unit in a PxPack map
-         *
-         * Though [Short] is signed, this value is really unsigned, so upcast to an [Int] as necessary.
          */
-        val y: Short,
+        val y: Int,
 
         /**
          * A set of two bytes whose purpose is unknown
@@ -49,6 +45,9 @@ internal data class PxUnit(
         val name: String
 ) {
     init {
+        require(x in COORDINATE_RANGE && y in COORDINATE_RANGE)
+        { "x & y must be in range $COORDINATE_RANGE (x: $x, y: $y)" }
+
         name.validateName("unit")
 
         require(type in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
@@ -66,6 +65,11 @@ internal data class PxUnit(
          * The valid range for any [PxUnit's][PxUnit] [type] to occupy
          */
         val UNIT_TYPE_RANGE = 0..0xFF //0..174
+
+        /**
+         * The valid range for the [x] and [y] coordinates of any [PxUnit] to occupy
+         */
+        val COORDINATE_RANGE = 0 until 0xFFFF
     }
 
     // TODO: Consider overriding toString to display values in hexadecimal notation
@@ -302,4 +306,8 @@ internal data class PxUnit(
     }
 }
 
+/**
+ * The [x][PxUnit.x] and [y][PxUnit.y] coordinates of `this` [PxUnit] as a [Pair],
+ * where `x` is the first component and `y` is the second
+ */
 internal val PxUnit.coordinates get() = Pair(x, y)

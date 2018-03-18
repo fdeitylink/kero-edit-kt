@@ -2,62 +2,55 @@ package io.fdeitylink.kero.map
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.plus
-
-import io.fdeitylink.util.toUInt
 
 /**
  * Represents an individual tile layer in a PxPack map
  *
- * @property tiles The tiles of this tile layer
- *
  * @constructor
- * Constructs a new [TileLayer] with the given [width] and [height] and [tiles]
+ * Constructs a new [TileLayer] with the given [width], [height], and `tiles`
  *
- * If no argument is passed for [tiles], all tiles will be initialized to `0`
+ * If no argument is passed for `tiles`, all tiles will be initialized to `0`
  *
- * @throws [IllegalArgumentException] if [width] or [height] exceed [MAXIMUM_SIZE_OF_DIMENSION]
+ * @throws [IllegalArgumentException] if [width] or [height] are not in the range [DIMENSION_RANGE],
+ *                                    their product is not equal to the size of [tiles],
+ *                                    or if any tiles are not in the range [TILE_INDEX_RANGE]
  */
 internal class TileLayer(
         width: Int,
         height: Int,
-        val tiles: ImmutableList<TileIndex> = immutableListOf(*Array(width * height) { 0.toByte() })
+        tiles: List<TileIndex> = immutableListOf(*Array(width * height) { 0 })
 ) {
-    // TODO: Consider adding setters for width and height that delegate to resize()
+    private val _tiles: ImmutableList<TileIndex> = tiles.toImmutableList()
+
+    /**
+     * The tiles of this tile layer
+     */
+    inline val tiles: List<TileIndex> get() = _tiles
+
+    // TODO: Consider adding setters for width and height that delegate to resized
 
     // Size is checked against 0 so neither dimension holds a nonsensical value (e.g. width = 3 when size = 0)
 
     /**
      * The width of this tile layer
-     *
-     * Though [Short] is signed, this value is really unsigned, so upcast to an [Int] as necessary
      */
-    val width = if (width * height == 0) 0 else width.toShort()
+    val width = if (width * height == 0) 0 else width
 
     /**
      * The height of this tile layer
-     *
-     * Though [Short] is signed, this value is really unsigned, so upcast to an [Int] as necessary
      */
-    val height = if (width * height == 0) 0 else height.toShort()
+    val height = if (width * height == 0) 0 else height
 
     init {
-        require(width <= MAXIMUM_SIZE_OF_DIMENSION && height <= MAXIMUM_SIZE_OF_DIMENSION)
-        { "layer dimensions must be <= $MAXIMUM_SIZE_OF_DIMENSION (width: $width, height: $height)" }
+        require(width in DIMENSION_RANGE && height in DIMENSION_RANGE)
+        { "layer dimensions must be in range $DIMENSION_RANGE (width: $width, height: $height)" }
 
         require(size == tiles.size) { "width * height != tiles.size (expected: $size, actual: ${tiles.size})" }
-    }
 
-    /**
-     * Constructs a new [TileLayer] with the given [width] and [height]
-     *
-     * If no argument is passed for [tiles], all tiles will be initialized to `0`
-     */
-    constructor(
-            width: Short,
-            height: Short,
-            tiles: ImmutableList<TileIndex> = immutableListOf(*Array(width * height) { 0.toByte() })
-    ) : this(width.toInt(), height.toInt(), tiles)
+        require(tiles.all { it in TILE_INDEX_RANGE }) { "all tiles must be in range $TILE_INDEX_RANGE" }
+    }
 
     /**
      * Constructs a new [TileLayer] with a [width] and [height] of `0`
@@ -65,119 +58,108 @@ internal class TileLayer(
     constructor() : this(0, 0, immutableListOf())
 
     /**
-     * Returns the tile in this [TileLayer] with the given coordinates, which are treated as unsigned integers
-     */
-    operator fun get(x: Short, y: Short) = get(x.toUInt(), y.toUInt())
-
-    /**
      * Returns the tile in this [TileLayer] with the given coordinates
      */
-    operator fun get(x: Int, y: Int) = tiles[x, y]
-
-    /**
-     * Returns a copy of this [TileLayer] with the tile at the specified coordinates,
-     * which are treated as unsigned integers, replaced with the given [tile]
-     */
-    fun set(x: Short, y: Short, tile: TileIndex) = set(x.toUInt(), y.toUInt(), tile)
+    operator fun get(x: Int, y: Int) = _tiles[x, y]
 
     /**
      * Returns a copy of this [TileLayer] with the tile at the specified coordinates replaced with the given [tile]
+     *
+     * @throws IllegalArgumentException if tile is not in the range [TILE_INDEX_RANGE]
      */
-    fun set(x: Int, y: Int, tile: TileIndex) =
-            if (tiles[x, y] == tile) {
-                this
-            }
-            else {
-                TileLayer(
-                        width,
-                        height,
-                        tiles.set(Pair(x, y).toIndex(), tile)
-                )
-            }
+    fun set(x: Int, y: Int, tile: TileIndex): TileLayer {
+        require(tile in TILE_INDEX_RANGE) { "tile must be in range $TILE_INDEX_RANGE (tile: $tile)" }
+
+        return if (_tiles[x, y] == tile) {
+            this
+        }
+        else {
+            TileLayer(width, height, _tiles.set(Pair(x, y).toIndex(), tile))
+        }
+    }
 
     /**
-     * Returns a copy of this [TileLayer] that has been resized to the given [width] and [height],
-     * which are treated as unsigned integers
+     * Returns a copy of this [TileLayer] that has been resized to the given [newWidth] and [newHeight]
+     *
+     * @throws IllegalArgumentException if [newWidth] or [newHeight] are not in the range [DIMENSION_RANGE]
      */
-    fun resize(width: Short, height: Short) = resize(width.toUInt(), height.toUInt())
+    fun resized(newWidth: Int, newHeight: Int): TileLayer {
+        require(newWidth in DIMENSION_RANGE && newHeight in DIMENSION_RANGE)
+        { "layer dimensions must be in range $DIMENSION_RANGE (newWidth: $newWidth, newHeight: $newHeight)" }
 
-    /**
-     * Returns a copy of this [TileLayer] that has been resized to the given [width] and [height]
-     */
-    fun resize(width: Int, height: Int) =
-            if (isEmpty() || width * height == 0) {
-                TileLayer(width, height)
-            }
-            else if (this.width.toUInt() == width && this.height.toUInt() == height) {
-                this
-            }
-            else {
-                val wDiff = width - this.width
-                val hDiff = height - this.height
+        return if (isEmpty() || newWidth * newHeight == 0) {
+            TileLayer(newWidth, newHeight)
+        }
+        else if (this.width == newWidth && this.height == newHeight) {
+            this
+        }
+        else {
+            val wDiff = newWidth - this.width
+            val hDiff = newHeight - this.height
 
-                val newTiles = when {
-                    wDiff > 0 -> {
-                        // By iterating backwards, we needn't worry about tile indexes being moved as the rows are expanded
-                        (1..this.height).toList().foldRight(tiles) { row, tiles ->
-                            // Wherever the end of a row used to be, insert enough null tiles to reach the new width
-                            tiles.addAll(this.width * row, List(wDiff) { 0.toByte() })
-                        }
-                    }
-                    wDiff < 0 -> {
-                        (0 until this.height)
-                                //toIndex() uses this.width, which is valid for use here
-                                .map { row -> tiles.subList(Pair(0, row).toIndex(), Pair(width, row).toIndex()) }
-                                .reduce { tiles, row -> tiles + row }
-                    }
-                    else -> tiles
-                }.let { tiles ->
-                    when {
-                    // Add enough null tiles to the end of the list to create the additional rows
-                        hDiff > 0 -> tiles.addAll(tiles.lastIndex + 1, List(hDiff * width) { 0.toByte() })
-                    // Remove from the end of the list to remove rows (hDiff < 0 so it's really subtraction here)
-                        hDiff < 0 -> tiles.subList(0, (tiles.lastIndex + 1) + hDiff * width)
-                        else -> tiles
+            val newTiles = when {
+                wDiff > 0 -> {
+                    // By iterating backwards, we needn't worry about tile indexes being moved as the rows are expanded
+                    (1..this.height).toList().foldRight(_tiles) { row, tiles ->
+                        // Wherever the end of a row used to be, insert enough null tiles to reach the new newWidth
+                        tiles.addAll(this.width * row, List(wDiff) { 0 })
                     }
                 }
-
-                TileLayer(width, height, newTiles)
+                wDiff < 0 -> {
+                    (0 until this.height)
+                            //toIndex() uses this.newWidth, which is valid for use here
+                            .map { row -> _tiles.subList(Pair(0, row).toIndex(), Pair(newWidth, row).toIndex()) }
+                            .reduce { tiles, row -> tiles + row }
+                }
+                else -> _tiles
+            }.let { tiles ->
+                when {
+                // Add enough null tiles to the end of the list to create the additional rows
+                    hDiff > 0 -> tiles.addAll(tiles.lastIndex + 1, List(hDiff * newWidth) { 0 })
+                // Remove from the end of the list to remove rows (hDiff < 0 so it's really subtraction here)
+                    hDiff < 0 -> tiles.subList(0, (tiles.lastIndex + 1) + hDiff * newWidth)
+                    else -> tiles
+                }
             }
+
+            TileLayer(newWidth, newHeight, newTiles)
+        }
+    }
 
     override fun equals(other: Any?) =
             (this === other) ||
             (other is TileLayer &&
              other.width == width &&
              other.height == height &&
-             other.tiles == tiles)
+             other._tiles == _tiles)
 
     override fun hashCode(): Int {
-        var result = tiles.hashCode()
+        var result = _tiles.hashCode()
         result = 31 * result + width
         result = 31 * result + height
         return result
     }
 
     override fun toString() =
-            tiles.chunked(width.toUInt()).joinToString(separator = " ", prefix = "$width x $height") {
+            tiles.chunked(width).joinToString(separator = " ", prefix = "$width x $height") {
                 it.joinToString(separator = " ", prefix = "\n") { String.format("%02X", it) }
             }
 
     private operator fun ImmutableList<TileIndex>.get(x: Int, y: Int) = get(Pair(x, y).toIndex())
 
-    private operator fun Int.component1() = this % width.toUInt()
+    private operator fun Int.component1() = this % width
 
-    private operator fun Int.component2() = this / width.toUInt()
+    private operator fun Int.component2() = this / width
 
-    private fun Int.toCoordinates(width: Int = this@TileLayer.width.toUInt()) = this.let { (x, y) -> Pair(x, y) }
+    private fun Int.toCoordinates(width: Int = this@TileLayer.width) = this.let { (x, y) -> Pair(x, y) }
 
-    private fun Pair<Int, Int>.toIndex(width: Int = this@TileLayer.width.toUInt()) =
-            this.let { (x, y) -> x + y * width }
+    private fun Pair<Int, Int>.toIndex(width: Int = this@TileLayer.width) = this.let { (x, y) -> x + y * width }
 
     companion object {
         /**
          * The string that marks the beginning of a new tile layer in a PxPack file
          */
-        const val HEADER_STRING ="pxMAP01\u0000"
+        const val HEADER_STRING = "pxMAP01\u0000"
 
         /**
          * The number of tile layers in a PxPack map
@@ -185,9 +167,18 @@ internal class TileLayer(
         const val NUMBER_OF_TILE_LAYERS = 3
 
         /**
-         * The maximum width or height for a tile layer in a PxPack map
+         * The valid range for [TileIndexes][TileIndex] to occupy
+         *
+         * Equivalent to the range of an unsigned byte (`0..0xFF`)
          */
-        const val MAXIMUM_SIZE_OF_DIMENSION = 0xFFFF
+        val TILE_INDEX_RANGE = 0..0xFF
+
+        /**
+         * The valid range for [width] or [height] to occupy
+         *
+         * Equivalent to the range of an unsigned short (`0..0xFFFF`)
+         */
+        val DIMENSION_RANGE = 0..0xFFFF
     }
 
     /**
@@ -201,11 +192,9 @@ internal class TileLayer(
 }
 
 /**
- * Typealias for a byte representing a tile index in a tileset
- *
- * Though [Byte] is signed, values of this type are really unsigned, so upcast to an [Int] as necessary
+ * Typealias for an [Int] representing a tile index in a tileset
  */
-internal typealias TileIndex = Byte
+internal typealias TileIndex = Int
 
 /**
  * The product of `this` [TileLayer's][TileLayer] [width][TileLayer.width] and [height][TileLayer.height]

@@ -7,6 +7,7 @@ import io.fdeitylink.kero.map.Head
 import io.fdeitylink.kero.map.LayerProperties
 import io.fdeitylink.kero.map.byte
 import io.fdeitylink.kero.map.TileLayer
+import io.fdeitylink.kero.map.TileIndex
 import io.fdeitylink.kero.map.isEmpty
 import io.fdeitylink.kero.map.PxUnit
 
@@ -67,10 +68,10 @@ private fun TileLayer.toBytes() =
             ByteArray(4) { 0 }
         }
         else {
-            width.toBytes() +
-            height.toBytes() +
+            width.toShort().toBytes() +
+            height.toShort().toBytes() +
             0 + // TODO: Verify that this byte is always 0
-            tiles
+            tiles.map(TileIndex::toByte)
         }
 
 /**

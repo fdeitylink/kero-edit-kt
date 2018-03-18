@@ -86,7 +86,7 @@ private fun TileLayer.Companion.fromChannel(chan: SeekableByteChannel): TileLaye
     val (width, height) = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).let {
         chan.read(it)
         it.flip()
-        Pair(it.getShort(), it.getShort())
+        Pair(it.getShort().toUInt(), it.getShort().toUInt())
     }
 
     return if (width * height == 0) {
@@ -95,9 +95,9 @@ private fun TileLayer.Companion.fromChannel(chan: SeekableByteChannel): TileLaye
     else {
         chan.position(chan.position() + 1) // TODO: Verify that this byte is always 0
 
-        ByteBuffer.allocate(width.toUInt() * height.toUInt()).let {
+        ByteBuffer.allocate(width * height).let {
             chan.read(it)
-            TileLayer(width, height, immutableListOf(*it.array().toTypedArray()))
+            TileLayer(width, height, it.array().map(Byte::toUInt))
         }
     }
 }

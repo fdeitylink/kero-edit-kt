@@ -69,7 +69,7 @@ internal data class PxUnit(
         /**
          * The valid range for the [x] and [y] coordinates of any [PxUnit] to occupy
          */
-        val COORDINATE_RANGE = 0 until 0xFFFF
+        val COORDINATE_RANGE = TileLayer.DIMENSION_RANGE.first until TileLayer.DIMENSION_RANGE.endInclusive
     }
 
     // TODO: Consider overriding toString to display values in hexadecimal notation

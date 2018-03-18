@@ -80,7 +80,9 @@ internal data class PxUnit(
     enum class Type {
         DASH,
 
-        TRUSH_BOX,
+        EMPTY,
+
+        TRASH_BOX,
 
         /**
          * p2: 0=stop 1=mv-h 2=mv-v 3=mv-H 4=mv-V 10=mem block
@@ -96,6 +98,9 @@ internal data class PxUnit(
 
         LONG_WEED,
 
+        /**
+         * Ventilation fan 1
+         */
         KANKISEN_1,
 
         TRUNK,
@@ -114,6 +119,9 @@ internal data class PxUnit(
 
         TIMER_KUN,
 
+        /**
+         * Blacksmith
+         */
         KAJIYA,
 
         ENDLESS_ICE,
@@ -132,6 +140,9 @@ internal data class PxUnit(
 
         SHIELD_PLANT,
 
+        /**
+         * Mini crab
+         */
         KANI_MINI,
 
         RELAY,
@@ -168,6 +179,9 @@ internal data class PxUnit(
 
         CAMP_GATE,
 
+        /**
+         * Little uzo
+         */
         CHIBI_UZO,
 
         UZO_VOID_LAYER_0,
@@ -184,8 +198,14 @@ internal data class PxUnit(
 
         ROUGE,
 
+        /**
+         * Crab 7
+         */
         KANI_7,
 
+        /**
+         * Little crab 7
+         */
         KANI_CHIBI_7,
 
         PHONE,
@@ -202,7 +222,7 @@ internal data class PxUnit(
 
         ROLLING_FIBER,
 
-        BARBWIRE,
+        BARBED_WIRE,
 
         DOMINO,
 
@@ -218,7 +238,7 @@ internal data class PxUnit(
         FOCUS_CONTROL,
 
         /**
-         * prm2: 0=左 1=上 2=右 3=下
+         * prm2: 0=左 ("left") 1=上 ("up") 2=右 ("right") 3=下 ("down")
          */
         UZO_FLAME,
 
@@ -238,8 +258,14 @@ internal data class PxUnit(
 
         ELEVATOR_00,
 
+        /**
+         * Crab
+         */
         KANI,
 
+        /**
+         * Sea snail
+         */
         TOKOBUSHI,
 
         ANEMONE,
@@ -270,18 +296,21 @@ internal data class PxUnit(
 
         GOLDRUSH,
 
+        /**
+         * Shrimp flower 7
+         */
         EBI_FLOWER_7,
 
+        /**
+         * Flesh fly
+         */
         NIKUBAE,
 
-        /**
-         * layer0
-         */
-        UZO_GRAY,
+        UZO_GRAY_LAYER_0,
 
         BLOCK_2X2,
 
-        QUAKER_,
+        QUAKER,
 
         FLAG_MINE,
 
@@ -291,18 +320,199 @@ internal data class PxUnit(
 
         UZO_OVER_FENCE,
 
-        FLUO_LAMP,
+        FLUORESCENT_LAMP,
 
         GRAVITY_BLOCK_3,
 
-        UZO_CHIBI_RED;
+        /**
+         * Little red uzo
+         */
+        UZO_CHIBI_RED,
 
-        //UZO_GRAY
+        UZO_GRAY_LAYER_2,
+
+        SPARKER,
+
+        BACTERIA,
+
+        DIGESTY,
+
+        ROOF_WORM,
+
+        BIG_WORM,
+
+        SILHOUETTE,
+
+        ZOMBIE,
+
+        LEATHER,
+
+        WHITE_SETTER,
 
         /**
-         * Represents a given unit type's zero-based index into the unittype.txt file
+         * prm2: 0=左上 ("upper left") 1=右上 ("upper right") 2=左下 ("bottom left") 3=右下 ("bottom right")
          */
-        val byte = ordinal.toByte()
+        EGG_WORM,
+
+        /**
+         * swt 1:key coming, 2:keep close, 3:to open 4:key short
+         */
+        STONE_GATE,
+
+        FROG_PLANT,
+
+        WEAK_WEED,
+
+        /**
+         * Shrimp flower
+         */
+        EBI_FLOWER,
+
+        BUBBLE_1UP,
+
+        SHACHO_A,
+
+        FROZEN_FISH,
+
+        UZO_ELECTRIC,
+
+        FLOWER_VASE,
+
+        GRAY_SPIRAL,
+
+        TIME_ATTACK_DISPLAY,
+
+        /**
+         * Metal insect
+         */
+        METALMUSHI,
+
+        THE_BAR,
+
+        GRAVITY_ICE,
+
+        EARTH_FLY,
+
+        WALKING_MOSS,
+
+        MOB_STAND,
+
+        SPIKE_PLANT,
+
+        SIDEWINDER,
+
+        /**
+         * Swordsmith
+         */
+        KATANAKAJI,
+
+        CHEST_2,
+
+        WALK_PLANT,
+
+        BLUE_FISH,
+
+        DRAGON_FLOWER,
+
+        /**
+         * 0:room 1:tree 2:two birds
+         */
+        SET_BIRDS,
+
+        FLY_EVADE,
+
+        GRAVITY_BLOCK_2,
+
+        DORONKO,
+
+        TUMBLEWEED,
+
+        NEW_ARMS,
+
+        BAT_CEILING,
+
+        STRONG_BOX,
+
+        CHANDELIER,
+
+        BUBBLE_LIFT,
+
+        CALL_BATS,
+
+        BOOSTER,
+
+        BAT_PASSING,
+
+        ORANGE_FISH,
+
+        /**
+         * Sea urchin
+         */
+        ECHINUS,
+
+        KILLER_SENSOR,
+
+        /**
+         * prm=2 Stop
+         */
+        MOVING_BOX,
+
+        BOM_BOX,
+
+        /**
+         * s
+         */
+        EDGE_COIN,
+
+        EDGE_MEDAL,
+
+        FALL_LIGHT,
+
+        INTRO,
+
+        UZOUZO,
+
+        OFFICE_FLY,
+
+        SISTER,
+
+        SASUKE,
+
+        HANGER,
+
+        ROLLING_SNOW,
+
+        /**
+         * prm2: 動きをバラつかせる ("Variation of movement")
+         */
+        BALL_FLYER,
+
+        ROLLING_BIG,
+
+        REFRIGERATOR,
+
+        ICE_HILLOCK,
+
+        BEAR_CORE,
+
+        ANIMAL_BONE,
+
+        /**
+         * Ventilation fan 2
+         */
+        KANKISEN_2,
+
+        CARTON_BOX_L,
+
+        CARTON_BOX_S;
+
+        companion object {
+            // TODO: From testing, it would appear at least 250 types exist
+            /**
+             * The number of unit types that exist
+             */
+            const val NUMBER_OF_UNIT_TYPES = 175
+        }
     }
 }
 
@@ -311,3 +521,9 @@ internal data class PxUnit(
  * where `x` is the first component and `y` is the second
  */
 internal val PxUnit.coordinates get() = Pair(x, y)
+
+// TODO: Consider removing
+/**
+ * The byte representing `this` [Type's][PxUnit.Type] index in the unittype.txt file
+ */
+internal val PxUnit.Type.byte get() = ordinal.toByte()

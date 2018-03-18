@@ -62,7 +62,8 @@ internal data class Head(
 
     companion object {
         /**
-         * The string that marks the beginning of the head in a PxPack file
+         * The string that marks the beginning of the head in a PxPack file,
+         * or in other words marks the beginning of a PxPack file
          */
         const val HEADER_STRING = "PXPACK121127a**\u0000"
 
@@ -78,6 +79,7 @@ internal data class Head(
     }
 }
 
+// TODO: Consider storing Int instead of Byte
 /**
  * Represents the background color of a PxPack map
  *
@@ -152,19 +154,17 @@ internal data class LayerProperties(
  *
  * This class will likely eventually be replaced with an enum class where each enum represents a visibility type.
  */
-internal data class VisibilityType(
-        val type: Byte
-) {
+internal data class VisibilityType(val type: Int) {
     init {
-        require(type in 0 until NUMBER_OF_VISIBILITY_TYPES)
-        { "visibility type must be in range 0 - ${NUMBER_OF_VISIBILITY_TYPES - 1} (type: $type)" }
+        require(type in VISIBILITY_TYPE_RANGE)
+        { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $type)" }
     }
 
     companion object {
         /**
-         * The supposed number of visibility types that exist
+         * The supposed valid range for [VisibilityTypes][VisibilityType] to occupy
          */
-        const val NUMBER_OF_VISIBILITY_TYPES = 33
+        val VISIBILITY_TYPE_RANGE = 0..32
     }
 }
 

@@ -70,7 +70,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
                 val (visibilityType, scrollType) = ByteBuffer.allocate(2).let {
                     chan.read(it)
                     it.flip()
-                    Pair(VisibilityType(it.get()), ScrollType.values()[it.get().toUInt()])
+                    Pair(VisibilityType(it.get().toUInt()), ScrollType.values()[it.get().toUInt()])
                 }
 
                 Pair(it, LayerProperties(tileset, visibilityType, scrollType))

@@ -3,6 +3,8 @@ package io.fdeitylink.kero.file
 import java.nio.channels.ReadableByteChannel
 import java.nio.ByteBuffer
 
+import io.fdeitylink.kero.CHARSET
+
 internal fun validateHeader(chan: ReadableByteChannel, header: String, type: String) {
     ByteBuffer.allocate(header.toByteArray().size).let {
         chan.read(it)
@@ -16,4 +18,4 @@ internal inline fun validate(value: Boolean, lazyMessage: () -> Any) {
     }
 }
 
-internal fun String.Companion.fromBytes(bytes: ByteArray) = String(bytes, charset("SJIS"))
+internal fun String.Companion.fromBytes(bytes: ByteArray) = String(bytes, CHARSET)

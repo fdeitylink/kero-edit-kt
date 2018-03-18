@@ -1,5 +1,7 @@
 package io.fdeitylink.kero.file
 
+import io.fdeitylink.kero.CHARSET
+
 import io.fdeitylink.kero.map.PxPack
 import io.fdeitylink.kero.map.Head
 import io.fdeitylink.kero.map.LayerProperties
@@ -90,4 +92,4 @@ private fun PxUnit.toBytes() =
 /**
  * Converts a [String] into an SJIS-encoded [ByteArray], with its length in bytes placed at the head of the array
  */
-private fun String.toBytes() = toByteArray(charset("SJIS")).let { byteArrayOf(it.size.toByte()) + it }
+private fun String.toBytes() = toByteArray(CHARSET).let { byteArrayOf(it.size.toByte()) + it }

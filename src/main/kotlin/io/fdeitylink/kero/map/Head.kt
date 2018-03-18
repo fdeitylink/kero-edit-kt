@@ -188,17 +188,9 @@ internal enum class ScrollType {
 
     H_HALF,
 
-    /**
-     * In the original scroll.txt file, "H Quater" is listed, which is likely a typo
-     */
     H_QUARTER,
 
     V0_HALF;
-
-    /**
-     * The byte representing a given scroll type's index in the scroll.txt file
-     */
-    val byte = this.ordinal.toByte()
 
     companion object {
         /**
@@ -207,3 +199,9 @@ internal enum class ScrollType {
         const val NUMBER_OF_SCROLL_TYPES = 10
     }
 }
+
+// TODO: Consider removing
+/**
+ * The byte representing `this` [ScrollType's][ScrollType] index in the scroll.txt file
+ */
+internal val ScrollType.byte get() = ordinal.toByte()

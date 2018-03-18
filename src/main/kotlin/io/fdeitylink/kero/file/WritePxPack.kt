@@ -5,6 +5,7 @@ import io.fdeitylink.kero.CHARSET
 import io.fdeitylink.kero.map.PxPack
 import io.fdeitylink.kero.map.Head
 import io.fdeitylink.kero.map.LayerProperties
+import io.fdeitylink.kero.map.byte
 import io.fdeitylink.kero.map.TileLayer
 import io.fdeitylink.kero.map.isEmpty
 import io.fdeitylink.kero.map.PxUnit

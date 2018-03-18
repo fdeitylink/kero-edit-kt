@@ -1,6 +1,6 @@
 package io.fdeitylink.kero.map
 
-import java.util.EnumMap
+import io.fdeitylink.util.enumMapOf
 
 import io.fdeitylink.kero.validateName
 
@@ -41,12 +41,11 @@ internal data class Head(
         /**
          * A set of three tile layer property sets, where each corresponds to tile layer in this PxPack map
          */
-        val layerProperties: Map<TileLayer.Type, LayerProperties> =
-                EnumMap<TileLayer.Type, LayerProperties>(TileLayer.Type::class.java).also {
-                    it[TileLayer.Type.BACKGROUND] = LayerProperties()
-                    it[TileLayer.Type.MIDDLEGROUND] = LayerProperties(tileset = "")
-                    it[TileLayer.Type.FOREGROUND] = LayerProperties(scrollType = ScrollType.THREE_FOURTHS)
-                }
+        val layerProperties: Map<TileLayer.Type, LayerProperties> = enumMapOf(
+                TileLayer.Type.BACKGROUND to LayerProperties(),
+                TileLayer.Type.MIDDLEGROUND to LayerProperties(tileset = ""),
+                TileLayer.Type.FOREGROUND to LayerProperties(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
+        )
 ) {
     init {
         require(description.length <= MAXIMUM_DESCRIPTION_LENGTH)

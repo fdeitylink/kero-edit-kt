@@ -81,7 +81,7 @@ private fun TileLayer.toBytes() =
 private fun PxUnit.toBytes() =
         byteArrayOf(
                 flags,
-                type,
+                type.toByte(),
                 unknownByte
         ) +
         x.toBytes() +

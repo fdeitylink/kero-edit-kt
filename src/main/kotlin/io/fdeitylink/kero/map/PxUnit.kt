@@ -11,14 +11,13 @@ internal data class PxUnit(
          */
         val flags: Byte,
 
+        // TODO: Change this from Int to Type after determining how many unit types there are and finishing the Type enum class
         /**
          * Represents the specific type of this unit
          *
-         * Serves as a zero-based index into the unittype.txt file, which provides the actual type.
-         *
-         * Though [Byte] is signed, this value is really unsigned, so upcast to an [Int] as necessary.
+         * Serves as a zero-based index into the unittype.txt file, which provides the actual type
          */
-        val type: Byte,
+        val type: Int,
 
         /**
          * A byte whose purpose is unknown
@@ -49,27 +48,27 @@ internal data class PxUnit(
          */
         val name: String
 ) {
-    // Currently investigating the requirements - unittype.txt lists 175 units but a unit in 00title has type 177
     init {
         name.validateName("unit")
 
-        require(type.toUInt() in 0 until NUMBER_OF_UNIT_TYPES)
-        { "type must be in range 0 - $NUMBER_OF_UNIT_TYPES (type: $type)" }
+        require(type in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
     }
 
     companion object {
-        /**
-         * The total number of unit types that exist
-         */
-        const val NUMBER_OF_UNIT_TYPES = 175
-
+        // TODO: Consider moving this constant to PxPack
         /**
          * The maximum number of units in a PxPack map
          */
         const val MAXIMUM_NUMBER_OF_UNITS = 0xFFFF
+
+        // Currently investigating valid range - unittype.txt lists 175 types, but testing suggests at least 250 exist
+        /**
+         * The valid range for any [PxUnit's][PxUnit] [type] to occupy
+         */
+        val UNIT_TYPE_RANGE = 0..0xFF //0..174
     }
 
-    //TODO: Consider overriding toString to display values in hexadecimal notation
+    // TODO: Consider overriding toString to display values in hexadecimal notation
 
     /**
      * Enum class representing all unit types listed in unittype.txt

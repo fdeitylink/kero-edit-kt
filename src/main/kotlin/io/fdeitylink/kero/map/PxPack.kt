@@ -1,9 +1,8 @@
 package io.fdeitylink.kero.map
 
-import java.util.EnumMap
-
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
+import io.fdeitylink.util.enumMapOf
 
 /**
  * Represents a PxPack map
@@ -18,9 +17,7 @@ internal data class PxPack(
          * Represents the [tile layers][TileLayer] of this PxPack map
          */
         val layers: Map<TileLayer.Type, TileLayer> =
-                EnumMap<TileLayer.Type, TileLayer>(TileLayer.Type::class.java).also { map ->
-                    TileLayer.Type.values().forEach { map[it] = TileLayer() }
-                },
+                enumMapOf(*TileLayer.Type.values().map { Pair(it, TileLayer()) }.toTypedArray()),
 
         /**
          * Represents the [units][PxUnit] of this PxPack map

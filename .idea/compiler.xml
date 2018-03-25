@@ -2,8 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
-      <module name="kero-edit_main" target="1.9" />
-      <module name="kero-edit_test" target="1.9" />
+      <module name="kero-edit_main" target="10" />
+      <module name="kero-edit_test" target="10" />
     </bytecodeTargetLevel>
   </component>
 </project>

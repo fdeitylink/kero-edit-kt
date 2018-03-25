@@ -107,7 +107,7 @@ internal class TileLayer(
                 }
                 wDiff < 0 -> {
                     (0 until this.height)
-                            //toIndex() uses this.newWidth, which is valid for use here
+                            //toIndex() uses this.width, which is valid for use here
                             .map { row -> _tiles.subList(Pair(0, row).toIndex(), Pair(newWidth, row).toIndex()) }
                             .reduce { tiles, row -> tiles + row }
                 }

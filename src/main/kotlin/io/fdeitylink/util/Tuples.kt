@@ -29,7 +29,7 @@ data class Quadruple<out A, out B, out C, out D>(
 }
 
 /**
- * Represents a tetrad of values
+ * Represents a pentad of values
  *
  * There is no meaning attached to values in this class, it can be used for any purpose.
  * Quadruple exhibits value semantics, i.e. two quadruples are equal if all four components are equal.

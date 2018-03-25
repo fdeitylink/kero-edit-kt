@@ -12,7 +12,7 @@ import io.fdeitylink.util.toUInt
 import io.fdeitylink.util.Quadruple
 import io.fdeitylink.util.Quintuple
 
-import io.fdeitylink.util.enumMapOf
+import io.fdeitylink.util.toEnumMap
 
 import io.fdeitylink.kero.CHARSET
 
@@ -29,7 +29,7 @@ import io.fdeitylink.kero.validateName
 
 internal fun PxPack.Companion.fromChannel(chan: SeekableByteChannel): PxPack {
     val head = Head.fromChannel(chan)
-    val layers = enumMapOf(*TileLayer.Type.values().map { Pair(it, TileLayer.fromChannel(chan)) }.toTypedArray())
+    val layers = TileLayer.Type.values().associate { it to TileLayer.fromChannel(chan) }.toEnumMap()
 
     val numUnits = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN).let {
         chan.read(it)
@@ -63,8 +63,8 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
         BackgroundColor(it.get(), it.get(), it.get())
     }
 
-    val layerProperties = enumMapOf(
-            *TileLayer.Type.values().map {
+    val layerProperties =
+            TileLayer.Type.values().associate {
                 val tileset = nameFromChannel(chan, "tileset")
 
                 val (visibilityType, scrollType) = ByteBuffer.allocate(2).let {
@@ -73,9 +73,8 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
                     Pair(VisibilityType(it.get().toUInt()), ScrollType.values()[it.get().toUInt()])
                 }
 
-                Pair(it, LayerProperties(tileset, visibilityType, scrollType))
-            }.toTypedArray()
-    )
+                it to LayerProperties(tileset, visibilityType, scrollType)
+            }.toEnumMap()
 
     return Head(desc, maps, spritesheet, unknownBytes, bgColor, layerProperties)
 }

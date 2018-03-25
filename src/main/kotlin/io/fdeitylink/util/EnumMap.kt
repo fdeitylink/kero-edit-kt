@@ -13,3 +13,9 @@ inline fun <reified K : Enum<K>, V> enumMapOf() = EnumMap<K, V>(K::class.java)
  */
 inline fun <reified K : Enum<K>, V> enumMapOf(vararg pairs: Pair<K, V>) =
         EnumMap<K, V>(K::class.java).also { it.putAll(pairs) }
+
+/**
+ * Returns a new [EnumMap] with the contents of `this` [Map]
+ */
+@Suppress("NOTHING_TO_INLINE")
+inline fun <K : Enum<K>, V> Map<K, V>.toEnumMap() = EnumMap(this)

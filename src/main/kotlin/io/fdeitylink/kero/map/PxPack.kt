@@ -4,7 +4,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
 import kotlinx.collections.immutable.toImmutableList
 
-import io.fdeitylink.util.enumMapOf
+import io.fdeitylink.util.toEnumMap
 
 /**
  * Represents a PxPack map
@@ -18,8 +18,7 @@ internal data class PxPack(
         /**
          * Represents the [tile layers][TileLayer] of this PxPack map
          */
-        val layers: Map<TileLayer.Type, TileLayer> =
-                enumMapOf(*TileLayer.Type.values().map { Pair(it, TileLayer()) }.toTypedArray()),
+        val layers: Map<TileLayer.Type, TileLayer> = TileLayer.Type.values().associate { it to TileLayer() }.toEnumMap(),
 
         /**
          * Represents the [units][PxUnit] of this PxPack map
@@ -36,8 +35,7 @@ internal data class PxPack(
 
     constructor(
             head: Head = Head(),
-            layers: Map<TileLayer.Type, TileLayer> =
-                    enumMapOf(*TileLayer.Type.values().map { Pair(it, TileLayer()) }.toTypedArray()),
+            layers: Map<TileLayer.Type, TileLayer> = TileLayer.Type.values().associate { it to TileLayer() }.toEnumMap(),
             units: List<PxUnit> = immutableListOf()
     ) : this(head, layers, units.toImmutableList())
 

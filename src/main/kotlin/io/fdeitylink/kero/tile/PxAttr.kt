@@ -65,7 +65,7 @@ internal class PxAttr(attributes: List<TileAttribute> = immutableListOf(*Array(W
 
     private operator fun Int.component2() = this / WIDTH
 
-    private fun Int.toCoordinates(width: Int = PxAttr.WIDTH) = this.let { (x, y) -> Pair(x, y) }
+    private fun Int.toCoordinates(width: Int = PxAttr.WIDTH) = Pair(this % width, this / width)
 
     private fun Pair<Int, Int>.toIndex(width: Int = PxAttr.WIDTH) = this.let { (x, y) -> x + y * width }
 

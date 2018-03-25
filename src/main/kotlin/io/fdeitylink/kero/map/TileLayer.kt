@@ -151,7 +151,7 @@ internal class TileLayer(
 
     private operator fun Int.component2() = this / width
 
-    private fun Int.toCoordinates(width: Int = this@TileLayer.width) = this.let { (x, y) -> Pair(x, y) }
+    private fun Int.toCoordinates(width: Int = this@TileLayer.width) = Pair(this % width, this / width)
 
     private fun Pair<Int, Int>.toIndex(width: Int = this@TileLayer.width) = this.let { (x, y) -> x + y * width }
 

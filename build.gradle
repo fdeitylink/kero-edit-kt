@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.2.31'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.50'
 
     id 'com.github.johnrengelman.shadow' version '2.0.4'
 }
@@ -22,7 +22,7 @@ dependencies {
 
     implementation 'org.jetbrains.kotlinx:kotlinx-collections-immutable:0.1'
 
-    implementation 'no.tornado:tornadofx:1.7.15'
+    implementation 'no.tornado:tornadofx:1.7.16'
 
     testImplementation 'junit:junit:4.12'
 }

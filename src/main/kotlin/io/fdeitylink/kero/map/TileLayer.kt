@@ -199,11 +199,13 @@ internal class TileLayer(
 
     /**
      * Represents a type of tile layer in a PxPack map
+     *
+     * The order of the enum constants matches the order in which each layer appears within a PxPack file
      */
     internal enum class Type {
         FOREGROUND,
         MIDDLEGROUND,
-        BACKGROUND;
+        BACKGROUND
     }
 }
 

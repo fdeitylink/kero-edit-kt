@@ -31,6 +31,7 @@ internal data class PxPack(
          */
         val head: Head = Head(),
 
+        // TODO: Consider changing to SortedMap since order matters in the file and this would make iteration consistent
         /**
          * Represents the [tile layers][TileLayer] of this PxPack map
          */

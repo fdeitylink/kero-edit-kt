@@ -26,6 +26,8 @@ internal fun String.isValidName() = toByteArray(CHARSET).size <= MAXIMUM_NAME_LE
 
 /**
  * Throws an [IllegalArgumentException] if `this` name is invalid (as per [isValidName])
+ *
+ * @param type What this name is used for (used for exception message)
  */
 internal fun String.validateName(type: String = "") {
     require(toByteArray(CHARSET).size <= MAXIMUM_NAME_LENGTH) { "length of $type name must be <= $MAXIMUM_NAME_LENGTH" }

@@ -16,4 +16,4 @@
 
 package io.fdeitylink.kero.file
 
-class ParseException(message: String) : Exception(message)
+internal class ParseException(message: String) : Exception(message)

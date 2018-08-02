@@ -27,7 +27,7 @@ internal data class PxUnit(
          */
         val flags: Byte,
 
-        // TODO: Change this from Int to Type after determining how many unit types there are and finishing the Type enum class
+        // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
         /**
          * Represents the specific type of this unit
          *
@@ -538,8 +538,7 @@ internal data class PxUnit(
  */
 internal val PxUnit.coordinates get() = Pair(x, y)
 
-// TODO: Consider removing
 /**
- * The byte representing `this` [Type's][PxUnit.Type] index in the unittype.txt file
+ * Returns a [Byte] representing `this` [Type's][PxUnit.Type] index in the unittype.txt file
  */
-internal val PxUnit.Type.byte get() = ordinal.toByte()
+internal fun PxUnit.Type.toByte() = ordinal.toByte()

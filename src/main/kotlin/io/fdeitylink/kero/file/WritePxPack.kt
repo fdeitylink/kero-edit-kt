@@ -21,7 +21,7 @@ import io.fdeitylink.kero.CHARSET
 import io.fdeitylink.kero.map.PxPack
 import io.fdeitylink.kero.map.Head
 import io.fdeitylink.kero.map.LayerProperties
-import io.fdeitylink.kero.map.byte
+import io.fdeitylink.kero.map.toByte
 import io.fdeitylink.kero.map.TileLayer
 import io.fdeitylink.kero.map.TileIndex
 import io.fdeitylink.kero.map.isEmpty
@@ -45,7 +45,7 @@ internal fun PxPack.toBytes() =
  * This does not comprise a fully valid PxPack file, just part of it.
  */
 private fun Head.toBytes(): ByteArray {
-    fun LayerProperties.toBytes() = tileset.toBytes() + visibilityType.type.toByte() + scrollType.byte
+    fun LayerProperties.toBytes() = tileset.toBytes() + visibilityType.type.toByte() + scrollType.toByte()
 
     return Head.HEADER_STRING.toByteArray() +
 

@@ -216,8 +216,7 @@ internal enum class ScrollType {
     }
 }
 
-// TODO: Consider removing
 /**
- * The byte representing `this` [ScrollType's][ScrollType] index in the scroll.txt file
+ * Returns a [Byte] representing `this` [ScrollType's][ScrollType] index in the scroll.txt file
  */
-internal val ScrollType.byte get() = ordinal.toByte()
+internal fun ScrollType.toByte() = ordinal.toByte()

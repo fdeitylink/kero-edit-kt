@@ -16,13 +16,16 @@
 
 package io.fdeitylink.kero
 
-const val MAXIMUM_NAME_LENGTH = 15
+/**
+ * The maximum number of bytes a name may use when using the SJIS charset
+ */
+const val MAXIMUM_NAME_BYTE_LENGTH = 15
 
 /**
  * Returns `true` if a filename contains no spaces and
- * its length as a byte array does not exceed [MAXIMUM_NAME_LENGTH], `false` otherwise
+ * its length as a byte array does not exceed [MAXIMUM_NAME_BYTE_LENGTH], `false` otherwise
  */
-internal fun String.isValidName() = toByteArray(CHARSET).size <= MAXIMUM_NAME_LENGTH && ' ' !in this
+internal fun String.isValidName() = toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH && ' ' !in this
 
 /**
  * Throws an [IllegalArgumentException] if `this` name is invalid (as per [isValidName])
@@ -30,6 +33,7 @@ internal fun String.isValidName() = toByteArray(CHARSET).size <= MAXIMUM_NAME_LE
  * @param type What this name is used for (used for exception message)
  */
 internal fun String.validateName(type: String = "") {
-    require(toByteArray(CHARSET).size <= MAXIMUM_NAME_LENGTH) { "length of $type name must be <= $MAXIMUM_NAME_LENGTH" }
+    require(toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH)
+    { "length of $type name must be <= $MAXIMUM_NAME_BYTE_LENGTH" }
     require(' ' !in this) { "$type name may not contain spaces" }
 }

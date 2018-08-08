@@ -16,58 +16,83 @@
 
 package io.fdeitylink.kero.map
 
-import io.fdeitylink.kero.validateName
+import java.util.Objects
 
+import au.com.console.kassava.kotlinEquals
+import au.com.console.kassava.kotlinToString
+
+import tornadofx.*
+
+// TODO: Consider exposing SimpleIntegerProperty, SimpleStringProperty for coordinates, name
 /**
  * Represents an individual unit in a PxPack map
  */
-internal data class PxUnit(
-        /**
-         * Potentially represents a set of flags for this unit
-         */
-        val flags: Byte,
-
-        // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
-        /**
-         * Represents the specific type of this unit
-         *
-         * Serves as a zero-based index into the unittype.txt file, which provides the actual type
-         */
-        val type: Int,
-
-        /**
-         * A byte whose purpose is unknown
-         */
-        val unknownByte: Byte,
-
-        /**
-         * The x-coordinate of this unit in a PxPack map
-         */
-        val x: Int,
-
-        /**
-         * The y-coordinate of this unit in a PxPack map
-         */
-        val y: Int,
-
-        /**
-         * A set of two bytes whose purpose is unknown
-         */
-        val unknownBytes: Pair<Byte, Byte>,
-
-        /**
-         * The name of this unit, for use in scripts
-         */
-        val name: String
+internal class PxUnit(
+        flags: Byte,
+        type: Int,
+        unknownByte: Byte,
+        x: Int,
+        y: Int,
+        unknownBytes: Pair<Byte, Byte>,
+        name: String
 ) {
-    init {
-        require(x in COORDINATE_RANGE && y in COORDINATE_RANGE)
-        { "x & y must be in range $COORDINATE_RANGE (x: $x, y: $y)" }
+    /**
+     * Potentially represents a set of flags for this unit
+     */
+    var flags: Byte by property(flags)
 
-        name.validateName("unit")
+    //fun flagsProperty() = getProperty(PxUnit::flags)
 
-        require(type in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
-    }
+    // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
+    /**
+     * Represents the specific type of this unit
+     *
+     * Serves as a zero-based index into the unittype.txt file, which provides the actual type
+     */
+    var type: Int by property(type)
+
+    fun typeProperty() = getProperty(PxUnit::type)
+
+    /**
+     * A byte whose purpose is unknown
+     */
+    var unknownByte: Byte by property(unknownByte)
+
+    //fun unknownByteProperty() = getProperty(PxUnit::unknownByte)
+
+    /**
+     * The x-coordinate of this unit in a PxPack map
+     */
+    var x: Int by property(x)
+
+    fun xProperty() = getProperty(PxUnit::x)
+
+    /**
+     * The y-coordinate of this unit in a PxPack map
+     */
+    var y: Int by property(y)
+
+    fun yProperty() = getProperty(PxUnit::y)
+
+    /**
+     * A set of two bytes whose purpose is unknown
+     */
+    var unknownBytes: Pair<Byte, Byte> by property(unknownBytes)
+
+    //fun unknownBytesProperty() = getProperty(PxUnit::unknownBytes)
+
+    /**
+     * The name of this unit, for use in scripts
+     */
+    var name: String by property(name)
+
+    fun nameProperty() = getProperty(PxUnit::name)
+
+    override fun equals(other: Any?) = kotlinEquals(other, properties)
+
+    override fun hashCode() = Objects.hash(flags, type, unknownByte, x, y, unknownBytes, name)
+
+    override fun toString() = kotlinToString(properties)
 
     companion object {
         // TODO: Consider moving this constant to PxPack
@@ -86,9 +111,30 @@ internal data class PxUnit(
          * The valid range for the [x] and [y] coordinates of any [PxUnit] to occupy
          */
         val COORDINATE_RANGE = TileLayer.DIMENSION_RANGE.first until TileLayer.DIMENSION_RANGE.endInclusive
-    }
 
-    // TODO: Consider overriding toString to display values in hexadecimal notation
+        /**
+         * Used for [equals][PxUnit.equals] and [hashCode][PxUnit.hashCode] methods
+         */
+        private val properties = arrayOf(
+                PxUnit::flags,
+                PxUnit::type,
+                PxUnit::unknownByte,
+                PxUnit::x,
+                PxUnit::y,
+                PxUnit::unknownBytes,
+                PxUnit::name
+        )
+
+        fun Int.isValidForType() = this in UNIT_TYPE_RANGE
+
+        fun Int.validateForType() =
+                require(this in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $this)" }
+
+        fun Int.isValidForCoordinate() = this in COORDINATE_RANGE
+
+        fun Int.validateForCoordiante() =
+                require(this in COORDINATE_RANGE) { "coordinate must be in range $COORDINATE_RANGE (coordinate: $this)" }
+    }
 
     /**
      * Enum class representing all unit types listed in unittype.txt

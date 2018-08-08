@@ -36,7 +36,6 @@ import io.fdeitylink.kero.map.PxPack
 import io.fdeitylink.kero.map.Head
 import io.fdeitylink.kero.map.BackgroundColor
 import io.fdeitylink.kero.map.LayerProperties
-import io.fdeitylink.kero.map.VisibilityType
 import io.fdeitylink.kero.map.ScrollType
 import io.fdeitylink.kero.map.TileLayer
 import io.fdeitylink.kero.map.PxUnit
@@ -86,7 +85,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
                 val (visibilityType, scrollType) = ByteBuffer.allocate(2).let {
                     chan.read(it)
                     it.flip()
-                    Pair(VisibilityType(it.get().toUInt()), ScrollType.values()[it.get().toUInt()])
+                    Pair(it.get(), ScrollType.values()[it.get().toUInt()])
                 }
 
                 it to LayerProperties(tileset, visibilityType, scrollType)

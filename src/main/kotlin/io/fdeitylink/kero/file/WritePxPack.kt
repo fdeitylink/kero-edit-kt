@@ -45,7 +45,7 @@ internal fun PxPack.toBytes() =
  * This does not comprise a fully valid PxPack file, just part of it.
  */
 private fun Head.toBytes(): ByteArray {
-    fun LayerProperties.toBytes() = tileset.toBytes() + visibilityType.type.toByte() + scrollType.toByte()
+    fun LayerProperties.toBytes() = tileset.toBytes() + visibilityType + scrollType.toByte()
 
     return Head.HEADER_STRING.toByteArray() +
 

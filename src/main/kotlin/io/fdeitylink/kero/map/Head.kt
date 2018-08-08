@@ -23,6 +23,7 @@ import io.fdeitylink.kero.validateName
 import io.fdeitylink.util.Quintuple
 import io.fdeitylink.util.Quadruple
 
+// TODO: Consider changing maps and unknownBytes into Lists
 /**
  * Represents the head of a PxPack map
  */
@@ -136,9 +137,22 @@ internal data class LayerProperties(
         /**
          * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack map
          *
-         * See [VisibilityType's][VisibilityType] documentation for more information on this ambiguity
+         * Still not sure whether or not the byte in the file actually represents any kind of visibility toggle
+         * or setting, but when modifying the byte in a file the visibility of a particular layer would be changed.
+         *
+         * When set to:
+         *
+         * * `0`, the layer becomes invisible
+         *
+         * * `2`, the layer is visible (the byte usually holds this value)
+         *
+         * * `1` or `3..32`, the wrong tiles are pulled but from the correct tileset (maybe an offset is applied?)
+         *
+         * * `33..`, the game crashes
+         *
+         * This class will probably eventually be replaced with an enum class
          */
-        val visibilityType: VisibilityType = VisibilityType(2),
+        val visibilityType: Byte = 2,
 
         /**
          * The type of scrolling used to display a tile layer in a PxPack map
@@ -147,38 +161,14 @@ internal data class LayerProperties(
 ) {
     init {
         tileset.validateName("tileset")
-    }
-}
 
-/**
- * Potentially represents some kind of visibility setting for a tile layer in a PxPack map.
- *
- * Though this class is called `VisibilityType`, whether or not the information in a PxPack file
- * that the relevant byte stores actually represents any kind of visibility toggle or setting is
- * unknown. It is named as such because when modifying the relevant byte in a PxPack file, the
- * visibility of a tile layer was altered, although it is ambiguous as to how.
- *
- * Setting the relevant byte to the following values seems to have the corresponding effects:
- *
- * `0`: invisible
- *
- * `2`: visible (the byte also usually seems to hold this value)
- *
- * `1` or `3..32`: pulls the wrong tiles but from the correct/same tileset (potentially applies some kind of offset)
- *
- * `33..`: game crashes
- *
- * This class will likely eventually be replaced with an enum class where each enum represents a visibility type.
- */
-internal data class VisibilityType(val type: Int) {
-    init {
-        require(type in VISIBILITY_TYPE_RANGE)
-        { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $type)" }
+        require(visibilityType in VISIBILITY_TYPE_RANGE)
+        { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $visibilityType)" }
     }
 
     companion object {
         /**
-         * The supposed valid range for [VisibilityTypes][VisibilityType] to occupy
+         * The supposed valid range for [visibilityType] to occupy
          */
         val VISIBILITY_TYPE_RANGE = 0..32
     }

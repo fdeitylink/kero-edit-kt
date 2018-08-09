@@ -51,26 +51,17 @@ private fun Head.toBytes(): ByteArray {
 
            description.toBytes() +
 
-           maps.first.toBytes() +
-           maps.second.toBytes() +
-           maps.third.toBytes() +
-           maps.fourth.toBytes() +
+           maps.map(String::toBytes).reduce(ByteArray::plus) +
 
            spritesheet.toBytes() +
 
-           unknownBytes.first +
-           unknownBytes.second +
-           unknownBytes.third +
-           unknownBytes.fourth +
-           unknownBytes.fifth +
+           unknownBytes +
 
            bgColor.red +
            bgColor.green +
            bgColor.blue +
 
-           layerProperties[TileLayer.Type.BACKGROUND]!!.toBytes() +
-           layerProperties[TileLayer.Type.MIDDLEGROUND]!!.toBytes() +
-           layerProperties[TileLayer.Type.FOREGROUND]!!.toBytes()
+           layerProperties.toSortedMap().values.map(LayerProperties::toBytes).reduce(ByteArray::plus)
 }
 
 /**

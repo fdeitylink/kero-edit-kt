@@ -25,9 +25,6 @@ import java.nio.ByteOrder
 
 import io.fdeitylink.util.toUInt
 
-import io.fdeitylink.util.Quadruple
-import io.fdeitylink.util.Quintuple
-
 import io.fdeitylink.util.toEnumMap
 
 import io.fdeitylink.kero.CHARSET
@@ -63,13 +60,12 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
     validate(desc.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_LENGTH) { "description is too long (desc: $desc)" }
 
     val maps = List(NUMBER_OF_REFERENCED_MAPS) { nameFromChannel(chan, "map") }
-            .let { (first, second, third, fourth) -> Quadruple(first, second, third, fourth) }
 
     val spritesheet = nameFromChannel(chan, "spritesheet")
 
-    val unknownBytes = ByteBuffer.allocate(5).let {
+    val unknownBytes = ByteBuffer.allocate(NUMBER_OF_UNKNOWN_BYTES).let {
         chan.read(it)
-        it.array().let { (first, second, third, fourth, fifth) -> Quintuple(first, second, third, fourth, fifth) }
+        it.array().toList()
     }
 
     val bgColor = ByteBuffer.allocate(3).let {

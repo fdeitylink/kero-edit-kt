@@ -20,10 +20,6 @@ import io.fdeitylink.util.enumMapOf
 
 import io.fdeitylink.kero.validateName
 
-import io.fdeitylink.util.Quintuple
-import io.fdeitylink.util.Quadruple
-
-// TODO: Consider changing maps and unknownBytes into Lists
 /**
  * Represents the head of a PxPack map
  */
@@ -38,7 +34,7 @@ internal data class Head(
         /**
          * A set of up to four maps referenced by this PxPack map
          */
-        val maps: Quadruple<String, String, String, String> = Quadruple("", "", "", ""),
+        val maps: List<String> = List(NUMBER_OF_REFERENCED_MAPS) { "" },
 
         /**
          * The spritesheet used for rendering the [units][PxUnit] of this PxPack map
@@ -48,7 +44,7 @@ internal data class Head(
         /**
          * A set of five bytes whose purpose is unknown
          */
-        val unknownBytes: Quintuple<Byte, Byte, Byte, Byte, Byte> = Quintuple(0, 0, 0, 0, 0),
+        val unknownBytes: List<Byte> = List(NUMBER_OF_UNKNOWN_BYTES) { 0.toByte() },
 
         /**
          * The background color of this PxPack map
@@ -68,8 +64,14 @@ internal data class Head(
         require(description.length <= MAXIMUM_DESCRIPTION_LENGTH)
         { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
 
-        maps.let { (a, b, c, d) -> listOf(a, b, c, d).forEach { it.validateName("map") } }
+        require(maps.size == NUMBER_OF_REFERENCED_MAPS)
+        { "maps.size != $NUMBER_OF_REFERENCED_MAPS (size :${maps.size})" }
+        maps.forEach { it.validateName("map") }
+
         spritesheet.validateName("spritesheet")
+
+        require(unknownBytes.size == NUMBER_OF_UNKNOWN_BYTES)
+        { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${unknownBytes.size})" }
 
         require(layerProperties.size == TileLayer.NUMBER_OF_TILE_LAYERS)
         { "layerProperties.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerProperties.size})" }
@@ -93,6 +95,11 @@ internal data class Head(
          * The number of maps that are referenced by a PxPack map
          */
         const val NUMBER_OF_REFERENCED_MAPS = 4
+
+        /**
+         * The number of contiguous bytes in the head of a PxPack map whose purpose is currently unknown
+         */
+        const val NUMBER_OF_UNKNOWN_BYTES = 5
     }
 }
 

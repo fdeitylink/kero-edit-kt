@@ -18,6 +18,9 @@ package io.fdeitylink.kero.map
 
 import java.util.Objects
 
+import javafx.beans.property.StringProperty
+import javafx.beans.property.SimpleStringProperty
+
 import au.com.console.kassava.kotlinEquals
 import au.com.console.kassava.kotlinToString
 
@@ -77,12 +80,14 @@ internal class PxUnit(
     @Suppress("CanBePrimaryConstructorProperty")
     var unknownBytes: Pair<Byte, Byte> = unknownBytes
 
+    private val nameProperty = SimpleStringProperty(name)
+
     /**
      * The name of this unit, for use in scripts
      */
-    var name: String by property(name)
+    var name: String by nameProperty
 
-    fun nameProperty() = getProperty(PxUnit::name)
+    fun nameProperty(): StringProperty = nameProperty
 
     override fun equals(other: Any?) = kotlinEquals(other, properties)
 

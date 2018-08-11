@@ -23,7 +23,6 @@ import au.com.console.kassava.kotlinToString
 
 import tornadofx.*
 
-// TODO: Consider exposing SimpleIntegerProperty, SimpleStringProperty for coordinates, name
 /**
  * Represents an individual unit in a PxPack map
  */
@@ -56,9 +55,8 @@ internal class PxUnit(
     /**
      * A byte whose purpose is unknown
      */
-    var unknownByte: Byte by property(unknownByte)
-
-    //fun unknownByteProperty() = getProperty(PxUnit::unknownByte)
+    @Suppress("CanBePrimaryConstructorProperty")
+    var unknownByte: Byte = unknownByte
 
     /**
      * The x-coordinate of this unit in a PxPack map
@@ -77,9 +75,8 @@ internal class PxUnit(
     /**
      * A set of two bytes whose purpose is unknown
      */
-    var unknownBytes: Pair<Byte, Byte> by property(unknownBytes)
-
-    //fun unknownBytesProperty() = getProperty(PxUnit::unknownBytes)
+    @Suppress("CanBePrimaryConstructorProperty")
+    var unknownBytes: Pair<Byte, Byte> = unknownBytes
 
     /**
      * The name of this unit, for use in scripts
@@ -113,7 +110,7 @@ internal class PxUnit(
         val COORDINATE_RANGE = TileLayer.DIMENSION_RANGE.first until TileLayer.DIMENSION_RANGE.endInclusive
 
         /**
-         * Used for [equals][PxUnit.equals] and [hashCode][PxUnit.hashCode] methods
+         * Used for `equals`, `hashCode`, and `toString` methods
          */
         private val properties = arrayOf(
                 PxUnit::flags,

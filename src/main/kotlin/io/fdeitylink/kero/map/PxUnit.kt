@@ -16,84 +16,67 @@
 
 package io.fdeitylink.kero.map
 
-import java.util.Objects
-
-import javafx.beans.property.StringProperty
-import javafx.beans.property.SimpleStringProperty
-
-import au.com.console.kassava.kotlinEquals
-import au.com.console.kassava.kotlinToString
-
 import tornadofx.*
+
+import io.fdeitylink.util.observable
 
 /**
  * Represents an individual unit in a PxPack map
  */
-internal class PxUnit(
-        flags: Byte,
-        type: Int,
-        unknownByte: Byte,
-        x: Int,
-        y: Int,
-        unknownBytes: Pair<Byte, Byte>,
-        name: String
+internal data class PxUnit(
+        /**
+         * Potentially represents a set of flags for this unit
+         */
+        var flags: Byte,
+
+        // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
+        /**
+         * Represents the specific type of this unit
+         *
+         * Serves as a zero-based index into the unittype.txt file, which provides the actual type
+         */
+        var type: Int,
+
+        /**
+         * A byte whose purpose is unknown
+         */
+        var unknownByte: Byte,
+
+        /**
+         * The x-coordinate of this unit in a PxPack map
+         */
+        var x: Int,
+
+        /**
+         * The y-coordinate of this unit in a PxPack map
+         */
+        var y: Int,
+
+        /**
+         * A set of two bytes whose purpose is unknown
+         */
+        var unknownBytes: Pair<Byte, Byte>,
+
+        /**
+         * The name of this unit, for use in scripts
+         */
+        var name: String
 ) {
-    /**
-     * Potentially represents a set of flags for this unit
-     */
-    @Suppress("CanBePrimaryConstructorProperty")
-    var flags: Byte = flags
+    private val typeProperty = observable(PxUnit::type)
 
-    // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
-    /**
-     * Represents the specific type of this unit
-     *
-     * Serves as a zero-based index into the unittype.txt file, which provides the actual type
-     */
-    var type: Int by property(type)
+    fun typeProperty() = typeProperty
 
-    fun typeProperty() = getProperty(PxUnit::type)
+    private val xProperty = observable(PxUnit::x)
 
-    /**
-     * A byte whose purpose is unknown
-     */
-    @Suppress("CanBePrimaryConstructorProperty")
-    var unknownByte: Byte = unknownByte
+    fun xProperty() = xProperty
 
-    /**
-     * The x-coordinate of this unit in a PxPack map
-     */
-    var x: Int by property(x)
+    private val yProperty = observable(PxUnit::y)
 
-    fun xProperty() = getProperty(PxUnit::x)
+    fun yProperty() = yProperty
 
-    /**
-     * The y-coordinate of this unit in a PxPack map
-     */
-    var y: Int by property(y)
+    private val nameProperty = observable(PxUnit::name)
 
-    fun yProperty() = getProperty(PxUnit::y)
-
-    /**
-     * A set of two bytes whose purpose is unknown
-     */
-    @Suppress("CanBePrimaryConstructorProperty")
-    var unknownBytes: Pair<Byte, Byte> = unknownBytes
-
-    private val nameProperty = SimpleStringProperty(name)
-
-    /**
-     * The name of this unit, for use in scripts
-     */
-    var name: String by nameProperty
-
-    fun nameProperty(): StringProperty = nameProperty
-
-    override fun equals(other: Any?) = kotlinEquals(other, properties)
-
-    override fun hashCode() = Objects.hash(*properties.map { it.get(this) }.toTypedArray())
-
-    override fun toString() = kotlinToString(properties)
+    fun nameProperty() = nameProperty
 
     companion object {
         // TODO: Consider moving this constant to PxPack
@@ -112,19 +95,6 @@ internal class PxUnit(
          * The valid range for the [x] and [y] coordinates of any [PxUnit] to occupy
          */
         val COORDINATE_RANGE = TileLayer.DIMENSION_RANGE.first until TileLayer.DIMENSION_RANGE.endInclusive
-
-        /**
-         * Used for `equals`, `hashCode`, and `toString` methods
-         */
-        private val properties = arrayOf(
-                PxUnit::flags,
-                PxUnit::type,
-                PxUnit::unknownByte,
-                PxUnit::x,
-                PxUnit::y,
-                PxUnit::unknownBytes,
-                PxUnit::name
-        )
 
         fun Int.isValidForType() = this in UNIT_TYPE_RANGE
 

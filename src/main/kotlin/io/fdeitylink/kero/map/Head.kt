@@ -55,9 +55,9 @@ internal data class Head(
          * A set of three tile layer property sets, where each corresponds to tile layer in this PxPack map
          */
         val layerProperties: Map<TileLayer.Type, LayerProperties> = enumMapOf(
-                TileLayer.Type.BACKGROUND to LayerProperties(),
+                TileLayer.Type.FOREGROUND to LayerProperties(),
                 TileLayer.Type.MIDDLEGROUND to LayerProperties(tileset = ""),
-                TileLayer.Type.FOREGROUND to LayerProperties(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
+                TileLayer.Type.BACKGROUND to LayerProperties(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
         )
 ) {
     init {
@@ -75,8 +75,8 @@ internal data class Head(
 
         require(layerProperties.size == TileLayer.NUMBER_OF_TILE_LAYERS)
         { "layerProperties.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerProperties.size})" }
-        require(layerProperties[TileLayer.Type.BACKGROUND]!!.tileset.isNotEmpty())
-        { "background tileset name may not be empty" }
+        require(layerProperties[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty())
+        { "foreground tileset name may not be empty" }
     }
 
     companion object {
@@ -138,11 +138,15 @@ internal data class BackgroundColor(
 internal data class LayerProperties(
         /**
          * The name of the tileset used to display a tile layer in a PxPack map
+         *
+         * Defaults to `"mpt00`
          */
         val tileset: String = "mpt00",
 
         /**
          * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack map
+         *
+         * Defaults to `2`
          *
          * Still not sure whether or not the byte in the file actually represents any kind of visibility toggle
          * or setting, but when modifying the byte in a file the visibility of a particular layer would be changed.
@@ -163,6 +167,8 @@ internal data class LayerProperties(
 
         /**
          * The type of scrolling used to display a tile layer in a PxPack map
+         *
+         * Defaults to [ScrollType.NORMAL]
          */
         val scrollType: ScrollType = ScrollType.NORMAL
 ) {

@@ -96,14 +96,14 @@ internal data class PxUnit(
          */
         val COORDINATE_RANGE = TileLayer.DIMENSION_RANGE.first until TileLayer.DIMENSION_RANGE.endInclusive
 
-        fun Int.isValidForType() = this in UNIT_TYPE_RANGE
+        fun Int.isValidType() = this in UNIT_TYPE_RANGE
 
-        fun Int.validateForType() =
+        fun Int.validateType() =
                 require(this in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $this)" }
 
-        fun Int.isValidForCoordinate() = this in COORDINATE_RANGE
+        fun Int.isValidCoordinate() = this in COORDINATE_RANGE
 
-        fun Int.validateForCoordiante() =
+        fun Int.validateCoordinate() =
                 require(this in COORDINATE_RANGE) { "coordinate must be in range $COORDINATE_RANGE (coordinate: $this)" }
     }
 

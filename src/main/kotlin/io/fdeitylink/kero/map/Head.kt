@@ -54,10 +54,10 @@ internal data class Head(
         /**
          * A set of three tile layer property sets, where each corresponds to tile layer in this PxPack map
          */
-        val layerProperties: Map<TileLayer.Type, LayerProperties> = enumMapOf(
-                TileLayer.Type.FOREGROUND to LayerProperties(),
-                TileLayer.Type.MIDDLEGROUND to LayerProperties(tileset = ""),
-                TileLayer.Type.BACKGROUND to LayerProperties(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
+        val layerMetadata: Map<TileLayer.Type, LayerMetadata> = enumMapOf(
+                TileLayer.Type.FOREGROUND to LayerMetadata(),
+                TileLayer.Type.MIDDLEGROUND to LayerMetadata(tileset = ""),
+                TileLayer.Type.BACKGROUND to LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
         )
 ) {
     init {
@@ -73,9 +73,9 @@ internal data class Head(
         require(unknownBytes.size == NUMBER_OF_UNKNOWN_BYTES)
         { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${unknownBytes.size})" }
 
-        require(layerProperties.size == TileLayer.NUMBER_OF_TILE_LAYERS)
-        { "layerProperties.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerProperties.size})" }
-        require(layerProperties[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty())
+        require(layerMetadata.size == TileLayer.NUMBER_OF_TILE_LAYERS)
+        { "layerMetadata.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerMetadata.size})" }
+        require(layerMetadata[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty())
         { "foreground tileset name may not be empty" }
     }
 
@@ -135,7 +135,7 @@ internal data class BackgroundColor(
 /**
  * Represents a set of properties for a tile layer in a PxPack map
  */
-internal data class LayerProperties(
+internal data class LayerMetadata(
         /**
          * The name of the tileset used to display a tile layer in a PxPack map
          *

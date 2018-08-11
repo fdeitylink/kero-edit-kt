@@ -32,7 +32,7 @@ import io.fdeitylink.kero.CHARSET
 import io.fdeitylink.kero.map.PxPack
 import io.fdeitylink.kero.map.Head
 import io.fdeitylink.kero.map.BackgroundColor
-import io.fdeitylink.kero.map.LayerProperties
+import io.fdeitylink.kero.map.LayerMetadata
 import io.fdeitylink.kero.map.ScrollType
 import io.fdeitylink.kero.map.TileLayer
 import io.fdeitylink.kero.map.PxUnit
@@ -75,7 +75,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
         BackgroundColor(it.get(), it.get(), it.get())
     }
 
-    val layerProperties =
+    val layerMetadata =
             TileLayer.Type.values().associate {
                 val tileset = nameFromChannel(chan, "tileset")
 
@@ -85,10 +85,10 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
                     Pair(it.get(), ScrollType.values()[it.get().toUInt()])
                 }
 
-                it to LayerProperties(tileset, visibilityType, scrollType)
+                it to LayerMetadata(tileset, visibilityType, scrollType)
             }.toEnumMap()
 
-    return Head(description, maps, spritesheet, unknownBytes, bgColor, layerProperties)
+    return Head(description, maps, spritesheet, unknownBytes, bgColor, layerMetadata)
 }
 
 private fun TileLayer.Companion.fromChannel(chan: SeekableByteChannel): TileLayer {

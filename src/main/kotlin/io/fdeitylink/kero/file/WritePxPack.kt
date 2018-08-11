@@ -20,7 +20,7 @@ import io.fdeitylink.kero.CHARSET
 
 import io.fdeitylink.kero.map.PxPack
 import io.fdeitylink.kero.map.Head
-import io.fdeitylink.kero.map.LayerProperties
+import io.fdeitylink.kero.map.LayerMetadata
 import io.fdeitylink.kero.map.toByte
 import io.fdeitylink.kero.map.TileLayer
 import io.fdeitylink.kero.map.TileIndex
@@ -45,7 +45,7 @@ internal fun PxPack.toBytes() =
  * This does not comprise a fully valid PxPack file, just part of it.
  */
 private fun Head.toBytes(): ByteArray {
-    fun LayerProperties.toBytes() = tileset.toBytes() + visibilityType + scrollType.toByte()
+    fun LayerMetadata.toBytes() = tileset.toBytes() + visibilityType + scrollType.toByte()
 
     return Head.HEADER_STRING.toByteArray() +
 
@@ -61,7 +61,7 @@ private fun Head.toBytes(): ByteArray {
            bgColor.green +
            bgColor.blue +
 
-           layerProperties.toSortedMap().values.map(LayerProperties::toBytes).reduce(ByteArray::plus)
+           layerMetadata.toSortedMap().values.map(LayerMetadata::toBytes).reduce(ByteArray::plus)
 }
 
 /**

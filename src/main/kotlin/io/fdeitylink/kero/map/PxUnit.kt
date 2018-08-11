@@ -87,7 +87,7 @@ internal class PxUnit(
 
     override fun equals(other: Any?) = kotlinEquals(other, properties)
 
-    override fun hashCode() = Objects.hash(flags, type, unknownByte, x, y, unknownBytes, name)
+    override fun hashCode() = Objects.hash(*properties.map { it.get(this) }.toTypedArray())
 
     override fun toString() = kotlinToString(properties)
 

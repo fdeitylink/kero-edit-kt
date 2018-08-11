@@ -38,9 +38,8 @@ internal class PxUnit(
     /**
      * Potentially represents a set of flags for this unit
      */
-    var flags: Byte by property(flags)
-
-    //fun flagsProperty() = getProperty(PxUnit::flags)
+    @Suppress("CanBePrimaryConstructorProperty")
+    var flags: Byte = flags
 
     // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
     /**

@@ -35,7 +35,8 @@ internal fun PxAttr.Companion.fromChannel(chan: SeekableByteChannel): PxAttr {
         val width = it.getShort().toUInt()
         val height = it.getShort().toUInt()
 
-        validate(width == PxAttr.WIDTH && height == PxAttr.HEIGHT) { "dimensions of PxAttr must be $WIDTH x $HEIGHT" }
+        validate(width == PxAttr.WIDTH && height == PxAttr.HEIGHT)
+        { "dimensions of PxAttr != $WIDTH x $HEIGHT (width: $width, height: $height)" }
     }
 
     chan.position(chan.position() + 1) // TODO: Verify that this byte is always 0

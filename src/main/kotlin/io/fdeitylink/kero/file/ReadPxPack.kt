@@ -56,8 +56,9 @@ internal fun PxPack.Companion.fromChannel(chan: SeekableByteChannel): PxPack {
 private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
     validateHeader(chan, HEADER_STRING, "PxPack")
 
-    val desc = String.fromChannel(chan)
-    validate(desc.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_LENGTH) { "description is too long (desc: $desc)" }
+    val description = String.fromChannel(chan)
+    validate(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_LENGTH)
+    { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
 
     val maps = List(NUMBER_OF_REFERENCED_MAPS) { nameFromChannel(chan, "map") }
 
@@ -87,7 +88,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
                 it to LayerProperties(tileset, visibilityType, scrollType)
             }.toEnumMap()
 
-    return Head(desc, maps, spritesheet, unknownBytes, bgColor, layerProperties)
+    return Head(description, maps, spritesheet, unknownBytes, bgColor, layerProperties)
 }
 
 private fun TileLayer.Companion.fromChannel(chan: SeekableByteChannel): TileLayer {

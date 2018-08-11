@@ -20,7 +20,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
 import kotlinx.collections.immutable.toImmutableList
 
-// TODO: Consider defaulting attributes to list of 0
 /**
  * Represents a set of tile attributes for a tileset
  *
@@ -41,8 +40,7 @@ internal class PxAttr(attributes: List<TileAttribute> = immutableListOf(*Array(W
     inline val attributes: List<TileAttribute> get() = _attributes
 
     init {
-        require(attributes.size == size)
-        { "attributes must represent a 2D matrix with dimensions $WIDTH x $HEIGHT" }
+        require(attributes.size == size) { "attributes.size != $size (size: ${attributes.size})" }
 
         require(attributes.all { it in ATTRIBUTE_RANGE }) { "all attributes must be in range $ATTRIBUTE_RANGE" }
     }
@@ -58,12 +56,7 @@ internal class PxAttr(attributes: List<TileAttribute> = immutableListOf(*Array(W
     fun set(x: Int, y: Int, attribute: TileAttribute): PxAttr {
         require(attribute in ATTRIBUTE_RANGE) { "attribute must be in range $ATTRIBUTE_RANGE (attribute: $attribute)" }
 
-        return if (_attributes[x, y] == attribute) {
-            this
-        }
-        else {
-            PxAttr(_attributes.set(Pair(x, y).toIndex(), attribute))
-        }
+        return if (_attributes[x, y] == attribute) this else PxAttr(_attributes.set(Pair(x, y).toIndex(), attribute))
     }
 
     override fun equals(other: Any?) = (this === other) || (other is PxAttr && other._attributes == _attributes)

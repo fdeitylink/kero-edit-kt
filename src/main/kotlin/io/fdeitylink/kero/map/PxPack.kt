@@ -47,7 +47,7 @@ internal data class PxPack(
         { "layers.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layers.size})" }
 
         require(units.size <= PxUnit.MAXIMUM_NUMBER_OF_UNITS)
-        { "number of units cannot exceed ${PxUnit.MAXIMUM_NUMBER_OF_UNITS} (size: ${units.size})" }
+        { "units.size must be <= ${PxUnit.MAXIMUM_NUMBER_OF_UNITS} (size: ${units.size})" }
     }
 
     constructor(

@@ -34,6 +34,6 @@ internal fun String.isValidName() = toByteArray(CHARSET).size <= MAXIMUM_NAME_BY
  */
 internal fun String.validateName(type: String = "") {
     require(toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH)
-    { "length of $type name must be <= $MAXIMUM_NAME_BYTE_LENGTH" }
-    require(' ' !in this) { "$type name may not contain spaces" }
+    { "$type name length must be <= $MAXIMUM_NAME_BYTE_LENGTH (name: $this)" }
+    require(' ' !in this) { "$type name may not contain spaces (name: $this)" }
 }

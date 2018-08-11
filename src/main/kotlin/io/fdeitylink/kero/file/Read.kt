@@ -24,7 +24,8 @@ import io.fdeitylink.kero.CHARSET
 internal fun validateHeader(chan: ReadableByteChannel, header: String, type: String) {
     ByteBuffer.allocate(header.toByteArray().size).let {
         chan.read(it)
-        validate(String.fromBytes(it.array()) == header) { "Invalid $type header" }
+        val readHeader = String.fromBytes(it.array())
+        validate(readHeader == header) { "$type header does not match $header (header: $readHeader)" }
     }
 }
 

@@ -82,7 +82,16 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
                 val (visibilityType, scrollType) = ByteBuffer.allocate(2).let {
                     chan.read(it)
                     it.flip()
-                    Pair(it.get(), ScrollType.values()[it.get().toUInt()])
+
+                    val vis = it.get()
+                    /*validate(vis in LayerMetadata.VISIBILITY_TYPE_RANGE)
+                    { "visibility type must be in range ${LayerMetadata.VISIBILITY_TYPE_RANGE} (type: $vis)" }*/
+
+                    val scrollIndex = it.get().toUInt()
+                    validate(scrollIndex < ScrollType.NUMBER_OF_SCROLL_TYPES)
+                    { "scroll type must be in range ${ScrollType.values().indices} (type: $scrollIndex)" }
+
+                    Pair(vis, ScrollType.values()[scrollIndex])
                 }
 
                 it to LayerMetadata(tileset, visibilityType, scrollType)
@@ -119,11 +128,17 @@ private fun PxUnit.Companion.fromChannel(chan: SeekableByteChannel) =
             it.flip()
 
             val flags = it.get()
+
             val type = it.get().toUInt()
+            //validate(type in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
+
             val unknownByte = it.get()
 
             val x = it.getShort().toUInt()
+            validate(x in COORDINATE_RANGE) { "x must be in range $COORDINATE_RANGE (x: $x)" }
+
             val y = it.getShort().toUInt()
+            validate(y in COORDINATE_RANGE) { "y must be in range $COORDINATE_RANGE (y: $y)" }
 
             val unknownBytes = Pair(it.get(), it.get())
 

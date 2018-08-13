@@ -43,6 +43,9 @@ internal fun PxAttr.Companion.fromChannel(chan: SeekableByteChannel): PxAttr {
 
     return ByteBuffer.allocate(PxAttr.WIDTH * PxAttr.HEIGHT).let {
         chan.read(it)
-        PxAttr(it.array().map(Byte::toUInt))
+        val attributes = it.array().map(Byte::toUInt)
+        validate(attributes.all { it in ATTRIBUTE_RANGE }) { "all attributes must be in range $ATTRIBUTE_RANGE" }
+
+        PxAttr(attributes)
     }
 }

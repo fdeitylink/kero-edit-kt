@@ -51,6 +51,7 @@ private fun Head.toBytes(): ByteArray {
 
            description.toBytes() +
 
+           // TODO: Take only first 4
            fields.map(String::toBytes).reduce(ByteArray::plus) +
 
            spritesheet.toBytes() +
@@ -101,4 +102,4 @@ private fun PxUnit.toBytes() =
 /**
  * Converts a [String] into an SJIS-encoded [ByteArray], with its length in bytes placed at the head of the array
  */
-private fun String.toBytes() = toByteArray(CHARSET).let { byteArrayOf(it.size.toByte()) + it }
+private fun String.toBytes() = toByteArray(CHARSET).let { byteArrayOf(it.size.toByte(), *it)}

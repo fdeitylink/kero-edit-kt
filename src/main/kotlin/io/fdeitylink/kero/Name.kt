@@ -25,7 +25,7 @@ const val MAXIMUM_NAME_BYTE_LENGTH = 15
  * Returns `true` if a filename contains no spaces and
  * its length as a byte array does not exceed [MAXIMUM_NAME_BYTE_LENGTH], `false` otherwise
  */
-internal fun String.isValidName() = toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH && ' ' !in this
+internal fun String.isValidName() = this.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH && ' ' !in this
 
 /**
  * Throws an [IllegalArgumentException] if `this` name is invalid (as per [isValidName])
@@ -33,7 +33,7 @@ internal fun String.isValidName() = toByteArray(CHARSET).size <= MAXIMUM_NAME_BY
  * @param type What this name is used for (used for exception message)
  */
 internal fun String.validateName(type: String = "") {
-    require(toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH)
+    require(this.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH)
     { "$type name length must be <= $MAXIMUM_NAME_BYTE_LENGTH (name: $this)" }
     require(' ' !in this) { "$type name may not contain spaces (name: $this)" }
 }

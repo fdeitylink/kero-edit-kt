@@ -16,6 +16,8 @@
 
 package io.fdeitylink.kero.field
 
+import java.util.Objects
+
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -103,11 +105,11 @@ internal class TileLayer(
         require(newWidth in DIMENSION_RANGE && newHeight in DIMENSION_RANGE)
         { "layer dimensions must be in range $DIMENSION_RANGE (newWidth: $newWidth, newHeight: $newHeight)" }
 
-        return if (isEmpty() || newWidth * newHeight == 0) {
-            TileLayer(newWidth, newHeight)
-        }
-        else if (this.width == newWidth && this.height == newHeight) {
+        return if (this.width == newWidth && this.height == newHeight) {
             this
+        }
+        else if (isEmpty() || newWidth * newHeight == 0) {
+            TileLayer(newWidth, newHeight)
         }
         else {
             val wDiff = newWidth - this.width
@@ -130,9 +132,9 @@ internal class TileLayer(
                 else -> _tiles
             }.let { tiles ->
                 when {
-                // Add enough null tiles to the end of the list to create the additional rows
+                    // Add enough null tiles to the end of the list to create the additional rows
                     hDiff > 0 -> tiles.addAll(tiles.lastIndex + 1, List(hDiff * newWidth) { 0 })
-                // Remove from the end of the list to remove rows (hDiff < 0 so it's really subtraction here)
+                    // Remove from the end of the list to remove rows (hDiff < 0 so it's really subtraction here)
                     hDiff < 0 -> tiles.subList(0, (tiles.lastIndex + 1) + hDiff * newWidth)
                     else -> tiles
                 }
@@ -145,16 +147,11 @@ internal class TileLayer(
     override fun equals(other: Any?) =
             (this === other) ||
             (other is TileLayer &&
-             other.width == width &&
-             other.height == height &&
-             other._tiles == _tiles)
+             width == other.width &&
+             height == other.height &&
+             _tiles == other._tiles)
 
-    override fun hashCode(): Int {
-        var result = _tiles.hashCode()
-        result = 31 * result + width
-        result = 31 * result + height
-        return result
-    }
+    override fun hashCode() = Objects.hash(_tiles, width, height)
 
     override fun toString() =
             tiles.chunked(width).joinToString(separator = " ", prefix = "$width x $height") {

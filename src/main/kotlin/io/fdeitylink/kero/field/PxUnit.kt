@@ -14,14 +14,14 @@
  *    limitations under the License.
  */
 
-package io.fdeitylink.kero.map
+package io.fdeitylink.kero.field
 
-import tornadofx.*
+import tornadofx.observable
 
 import io.fdeitylink.util.observable
 
 /**
- * Represents an individual unit in a PxPack map
+ * Represents an individual unit in a PxPack field
  */
 internal data class PxUnit(
         /**
@@ -43,12 +43,12 @@ internal data class PxUnit(
         var unknownByte: Byte,
 
         /**
-         * The x-coordinate of this unit in a PxPack map
+         * The x-coordinate of this unit in a PxPack field
          */
         var x: Int,
 
         /**
-         * The y-coordinate of this unit in a PxPack map
+         * The y-coordinate of this unit in a PxPack field
          */
         var y: Int,
 
@@ -81,7 +81,7 @@ internal data class PxUnit(
     companion object {
         // TODO: Consider moving this constant to PxPack
         /**
-         * The maximum number of units in a PxPack map
+         * The maximum number of units in a PxPack field
          */
         const val MAXIMUM_NUMBER_OF_UNITS = 0xFFFF
 

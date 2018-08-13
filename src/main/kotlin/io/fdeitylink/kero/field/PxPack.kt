@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package io.fdeitylink.kero.map
+package io.fdeitylink.kero.field
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
@@ -23,22 +23,22 @@ import kotlinx.collections.immutable.toImmutableList
 import io.fdeitylink.util.toEnumMap
 
 /**
- * Represents a PxPack map
+ * Represents a PxPack field
  */
 internal data class PxPack(
         /**
-         * Represents the [head][Head] of this PxPack map
+         * Represents the [head][Head] of this PxPack field
          */
         val head: Head = Head(),
 
         // TODO: Consider changing to SortedMap since order matters in the file and this would make iteration consistent
         /**
-         * Represents the [tile layers][TileLayer] of this PxPack map
+         * Represents the [tile layers][TileLayer] of this PxPack field
          */
         val layers: Map<TileLayer.Type, TileLayer> = TileLayer.Type.values().associate { it to TileLayer() }.toEnumMap(),
 
         /**
-         * Represents the [units][PxUnit] of this PxPack map
+         * Represents the [units][PxUnit] of this PxPack field
          */
         val units: ImmutableList<PxUnit> = immutableListOf()
 ) {

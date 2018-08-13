@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package io.fdeitylink.kero.map
+package io.fdeitylink.kero.field
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.immutableListOf
@@ -22,7 +22,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.plus
 
 /**
- * Represents an individual tile layer in a PxPack map
+ * Represents an individual tile layer in a PxPack field
  *
  * @constructor
  * Constructs a new [TileLayer] with the given [width], [height], and `tiles`
@@ -178,7 +178,7 @@ internal class TileLayer(
         const val HEADER_STRING = "pxMAP01\u0000"
 
         /**
-         * The number of tile layers in a PxPack map
+         * The number of tile layers in a PxPack field
          */
         const val NUMBER_OF_TILE_LAYERS = 3
 
@@ -198,7 +198,7 @@ internal class TileLayer(
     }
 
     /**
-     * Represents a type of tile layer in a PxPack map
+     * Represents a type of tile layer in a PxPack field
      *
      * The order of the enum constants matches the order in which each layer appears within a PxPack file
      */

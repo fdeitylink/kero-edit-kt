@@ -18,14 +18,14 @@ package io.fdeitylink.kero.file
 
 import io.fdeitylink.kero.CHARSET
 
-import io.fdeitylink.kero.map.PxPack
-import io.fdeitylink.kero.map.Head
-import io.fdeitylink.kero.map.LayerMetadata
-import io.fdeitylink.kero.map.toByte
-import io.fdeitylink.kero.map.TileLayer
-import io.fdeitylink.kero.map.TileIndex
-import io.fdeitylink.kero.map.isEmpty
-import io.fdeitylink.kero.map.PxUnit
+import io.fdeitylink.kero.field.PxPack
+import io.fdeitylink.kero.field.Head
+import io.fdeitylink.kero.field.LayerMetadata
+import io.fdeitylink.kero.field.toByte
+import io.fdeitylink.kero.field.TileLayer
+import io.fdeitylink.kero.field.TileIndex
+import io.fdeitylink.kero.field.isEmpty
+import io.fdeitylink.kero.field.PxUnit
 
 /**
  * Converts a [PxPack] to a [ByteArray] that can be directly written to a PxPack file.
@@ -51,7 +51,7 @@ private fun Head.toBytes(): ByteArray {
 
            description.toBytes() +
 
-           maps.map(String::toBytes).reduce(ByteArray::plus) +
+           fields.map(String::toBytes).reduce(ByteArray::plus) +
 
            spritesheet.toBytes() +
 

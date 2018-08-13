@@ -29,13 +29,13 @@ import io.fdeitylink.util.toEnumMap
 
 import io.fdeitylink.kero.CHARSET
 
-import io.fdeitylink.kero.map.PxPack
-import io.fdeitylink.kero.map.Head
-import io.fdeitylink.kero.map.BackgroundColor
-import io.fdeitylink.kero.map.LayerMetadata
-import io.fdeitylink.kero.map.ScrollType
-import io.fdeitylink.kero.map.TileLayer
-import io.fdeitylink.kero.map.PxUnit
+import io.fdeitylink.kero.field.PxPack
+import io.fdeitylink.kero.field.Head
+import io.fdeitylink.kero.field.BackgroundColor
+import io.fdeitylink.kero.field.LayerMetadata
+import io.fdeitylink.kero.field.ScrollType
+import io.fdeitylink.kero.field.TileLayer
+import io.fdeitylink.kero.field.PxUnit
 
 import io.fdeitylink.kero.validateName
 
@@ -60,7 +60,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
     validate(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_LENGTH)
     { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
 
-    val maps = List(NUMBER_OF_REFERENCED_MAPS) { nameFromChannel(chan, "map") }
+    val fields = List(NUMBER_OF_REFERENCED_FIELDS) { nameFromChannel(chan, "field") }
 
     val spritesheet = nameFromChannel(chan, "spritesheet")
 
@@ -97,7 +97,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
                 it to LayerMetadata(tileset, visibilityType, scrollType)
             }.toEnumMap()
 
-    return Head(description, maps, spritesheet, unknownBytes, bgColor, layerMetadata)
+    return Head(description, fields, spritesheet, unknownBytes, bgColor, layerMetadata)
 }
 
 private fun TileLayer.Companion.fromChannel(chan: SeekableByteChannel): TileLayer {

@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package io.fdeitylink.kero.map
+package io.fdeitylink.kero.field
 
 import javafx.collections.ObservableList
 
@@ -30,11 +30,11 @@ import io.fdeitylink.util.enumMapOf
 import io.fdeitylink.util.observable
 
 /**
- * Represents the head of a PxPack map
+ * Represents the head of a PxPack field
  */
 internal data class Head(
         /**
-         * A string used by the developer as a description of this PxPack map
+         * A string used by the developer as a description of this PxPack field
          *
          * Non-essential and not used by the game
          *
@@ -43,14 +43,14 @@ internal data class Head(
         var description: String = "",
 
         /**
-         * A set of up to four maps referenced by this PxPack map
+         * A set of up to four fields referenced by this PxPack field
          *
          * All are defaulted to `""`
          */
-        val maps: ObservableList<String> = MutableList(NUMBER_OF_REFERENCED_MAPS) { "" }.observable(),
+        val fields: ObservableList<String> = MutableList(NUMBER_OF_REFERENCED_FIELDS) { "" }.observable(),
 
         /**
-         * The spritesheet used for rendering the [units][PxUnit] of this PxPack map
+         * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
          *
          * Defaults to `""`
          */
@@ -65,7 +65,7 @@ internal data class Head(
 
         // TODO: Consider changing type to JavaFX Color
         /**
-         * The background color of this PxPack map
+         * The background color of this PxPack field
          *
          * Defaults to `BackgroundColor(0, 0, 0)`
          */
@@ -73,7 +73,7 @@ internal data class Head(
 
         // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
         /**
-         * A set of three tile layer property sets, where each corresponds to tile layer in this PxPack map
+         * A set of three tile layer property sets, where each corresponds to tile layer in this PxPack field
          *
          * Foreground defaults to `LayerMetaData()`,
          * middleground defaults to `LayerMetadata(tileset = "")`,
@@ -89,9 +89,9 @@ internal data class Head(
 
     fun descriptionProperty(): StringProperty = descriptionProperty
 
-    private val mapsProperty = ReadOnlyListWrapper(this, "maps", maps)
+    private val fieldsProperty = ReadOnlyListWrapper(this, "fields", fields)
 
-    fun mapsProperty(): ReadOnlyListProperty<String> = mapsProperty
+    fun fieldsProperty(): ReadOnlyListProperty<String> = fieldsProperty
 
     private val spritesheetProperty = observable(Head::spritesheet)
 
@@ -109,17 +109,17 @@ internal data class Head(
         const val HEADER_STRING = "PXPACK121127a**\u0000"
 
         /**
-         * The maximum length of the description string in a PxPack map
+         * The maximum length of the description string in a PxPack field
          */
         const val MAXIMUM_DESCRIPTION_LENGTH = 31
 
         /**
-         * The number of maps that are referenced by a PxPack map
+         * The number of fields that are referenced by a PxPack field
          */
-        const val NUMBER_OF_REFERENCED_MAPS = 4
+        const val NUMBER_OF_REFERENCED_FIELDS = 4
 
         /**
-         * The number of contiguous bytes in the head of a PxPack map whose purpose is currently unknown
+         * The number of contiguous bytes in the head of a PxPack field whose purpose is currently unknown
          */
         const val NUMBER_OF_UNKNOWN_BYTES = 5
 
@@ -132,7 +132,7 @@ internal data class Head(
          */
         operator fun invoke(
                 description: String = "",
-                maps: List<String> = List(NUMBER_OF_REFERENCED_MAPS) { "" },
+                fields: List<String> = List(NUMBER_OF_REFERENCED_FIELDS) { "" },
                 spritesheet: String = "",
                 unknownBytes: List<Byte> = List(NUMBER_OF_UNKNOWN_BYTES) { 0.toByte() },
                 bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
@@ -143,7 +143,7 @@ internal data class Head(
                 )
         ) = Head(
                 description,
-                maps.toMutableList().observable(),
+                fields.toMutableList().observable(),
                 spritesheet,
                 unknownBytes.toMutableList(),
                 bgColor,
@@ -156,11 +156,11 @@ internal data class Head(
                 require(this.length <= MAXIMUM_DESCRIPTION_LENGTH)
                 { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $this)" }
 
-        fun List<String>.isValidMaps() = this.size == NUMBER_OF_REFERENCED_MAPS
+        fun List<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS
 
-        fun List<String>.validateMaps() =
-                require(this.size == NUMBER_OF_REFERENCED_MAPS)
-                { "maps.size != $NUMBER_OF_REFERENCED_MAPS (size: ${this.size})" }
+        fun List<String>.validateFields() =
+                require(this.size == NUMBER_OF_REFERENCED_FIELDS)
+                { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${this.size})" }
 
         fun List<Byte>.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
 
@@ -183,7 +183,7 @@ internal data class Head(
 
 // TODO: Consider storing Int instead of Byte
 /**
- * Represents the background color of a PxPack map
+ * Represents the background color of a PxPack field
  *
  * Only the RGB values of the color are stored, so it must be opaque
  */
@@ -211,18 +211,18 @@ internal data class BackgroundColor(
 )
 
 /**
- * Represents a set of properties for a tile layer in a PxPack map
+ * Represents the metadata for a [tile layer][TileLayer] in a PxPack field
  */
 internal data class LayerMetadata(
         /**
-         * The name of the tileset used to display a tile layer in a PxPack map
+         * The name of the tileset used to display a tile layer in a PxPack field
          *
          * Defaults to `"mpt00"`
          */
         var tileset: String = "mpt00",
 
         /**
-         * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack map
+         * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack field
          *
          * Defaults to `2`
          *
@@ -244,7 +244,7 @@ internal data class LayerMetadata(
         var visibilityType: Byte = 2,
 
         /**
-         * The type of scrolling used to display a tile layer in a PxPack map
+         * The type of scrolling used to display a tile layer in a PxPack field
          *
          * Defaults to [ScrollType.NORMAL]
          */
@@ -278,7 +278,7 @@ internal data class LayerMetadata(
 }
 
 /**
- * Represents the scrolling type of a tile layer in a PxPack map
+ * Represents the scrolling type of a tile layer in a PxPack field
  */
 internal enum class ScrollType {
     NORMAL,

@@ -122,7 +122,7 @@ private fun TileLayer.Companion.fromChannel(chan: SeekableByteChannel): TileLaye
     }
 }
 
-private fun PxUnit.Companion.fromChannel(chan: SeekableByteChannel) =
+private fun PxUnit.Companion.fromChannel(chan: ReadableByteChannel) =
         ByteBuffer.allocate(9).order(ByteOrder.LITTLE_ENDIAN).let {
             chan.read(it)
             it.flip()
@@ -147,7 +147,7 @@ private fun PxUnit.Companion.fromChannel(chan: SeekableByteChannel) =
             PxUnit(flags, type, unknownByte, x, y, unknownBytes, name)
         }
 
-private fun nameFromChannel(chan: ReadableByteChannel, type: String) =
+private fun nameFromChannel(chan: ReadableByteChannel, type: String = "") =
         String.fromChannel(chan).also { it.validateName(type) }
 
 private fun String.Companion.fromChannel(chan: ReadableByteChannel): String {

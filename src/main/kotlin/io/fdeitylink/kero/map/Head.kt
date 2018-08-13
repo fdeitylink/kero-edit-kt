@@ -16,9 +16,18 @@
 
 package io.fdeitylink.kero.map
 
+import javafx.collections.ObservableList
+
+import javafx.beans.property.ReadOnlyListProperty
+import javafx.beans.property.ReadOnlyListWrapper
+
+import javafx.beans.property.StringProperty
+
+import tornadofx.observable
+
 import io.fdeitylink.util.enumMapOf
 
-import io.fdeitylink.kero.validateName
+import io.fdeitylink.util.observable
 
 /**
  * Represents the head of a PxPack map
@@ -28,31 +37,47 @@ internal data class Head(
          * A string used by the developer as a description of this PxPack map
          *
          * Non-essential and not used by the game
+         *
+         * Defaults to `""`
          */
-        val description: String = "",
+        var description: String = "",
 
         /**
          * A set of up to four maps referenced by this PxPack map
+         *
+         * All are defaulted to `""`
          */
-        val maps: List<String> = List(NUMBER_OF_REFERENCED_MAPS) { "" },
+        val maps: ObservableList<String> = MutableList(NUMBER_OF_REFERENCED_MAPS) { "" }.observable(),
 
         /**
          * The spritesheet used for rendering the [units][PxUnit] of this PxPack map
+         *
+         * Defaults to `""`
          */
-        val spritesheet: String = "",
+        var spritesheet: String = "",
 
         /**
          * A set of five bytes whose purpose is unknown
+         *
+         * All are defaulted to `0`
          */
-        val unknownBytes: List<Byte> = List(NUMBER_OF_UNKNOWN_BYTES) { 0.toByte() },
+        var unknownBytes: MutableList<Byte> = MutableList(NUMBER_OF_UNKNOWN_BYTES) { 0.toByte() },
 
+        // TODO: Consider changing type to JavaFX Color
         /**
          * The background color of this PxPack map
+         *
+         * Defaults to `BackgroundColor(0, 0, 0)`
          */
-        val bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
+        var bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
 
+        // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
         /**
          * A set of three tile layer property sets, where each corresponds to tile layer in this PxPack map
+         *
+         * Foreground defaults to `LayerMetaData()`,
+         * middleground defaults to `LayerMetadata(tileset = "")`,
+         * background defaults to `LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)`
          */
         val layerMetadata: Map<TileLayer.Type, LayerMetadata> = enumMapOf(
                 TileLayer.Type.FOREGROUND to LayerMetadata(),
@@ -60,24 +85,21 @@ internal data class Head(
                 TileLayer.Type.BACKGROUND to LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
         )
 ) {
-    init {
-        require(description.length <= MAXIMUM_DESCRIPTION_LENGTH)
-        { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
+    private val descriptionProperty = observable(Head::description)
 
-        require(maps.size == NUMBER_OF_REFERENCED_MAPS)
-        { "maps.size != $NUMBER_OF_REFERENCED_MAPS (size :${maps.size})" }
-        maps.forEach { it.validateName("map") }
+    fun descriptionProperty(): StringProperty = descriptionProperty
 
-        spritesheet.validateName("spritesheet")
+    private val mapsProperty = ReadOnlyListWrapper(this, "maps", maps)
 
-        require(unknownBytes.size == NUMBER_OF_UNKNOWN_BYTES)
-        { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${unknownBytes.size})" }
+    fun mapsProperty(): ReadOnlyListProperty<String> = mapsProperty
 
-        require(layerMetadata.size == TileLayer.NUMBER_OF_TILE_LAYERS)
-        { "layerMetadata.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerMetadata.size})" }
-        require(layerMetadata[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty())
-        { "foreground tileset name may not be empty" }
-    }
+    private val spritesheetProperty = observable(Head::spritesheet)
+
+    fun spritesheetProperty(): StringProperty = spritesheetProperty
+
+    private val bgColorProperty = observable(Head::bgColor)
+
+    fun bgColorProperty() = bgColorProperty
 
     companion object {
         /**
@@ -100,6 +122,62 @@ internal data class Head(
          * The number of contiguous bytes in the head of a PxPack map whose purpose is currently unknown
          */
         const val NUMBER_OF_UNKNOWN_BYTES = 5
+
+        /*
+         * Making an invoke function on the companion object rather than a secondary constructor makes the expression
+         * `Head()` call the primary constructor of the class and eliminates an ambiguity error between two constructors.
+         * There is no real difference between the primary constructor and this function other than some of the parameter
+         * types being more general for this function, so even if this function were chosen over the primary constructor,
+         * it would make no difference.
+         */
+        operator fun invoke(
+                description: String = "",
+                maps: List<String> = List(NUMBER_OF_REFERENCED_MAPS) { "" },
+                spritesheet: String = "",
+                unknownBytes: List<Byte> = List(NUMBER_OF_UNKNOWN_BYTES) { 0.toByte() },
+                bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
+                layerMetadata: Map<TileLayer.Type, LayerMetadata> = enumMapOf(
+                        TileLayer.Type.FOREGROUND to LayerMetadata(),
+                        TileLayer.Type.MIDDLEGROUND to LayerMetadata(tileset = ""),
+                        TileLayer.Type.BACKGROUND to LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
+                )
+        ) = Head(
+                description,
+                maps.toMutableList().observable(),
+                spritesheet,
+                unknownBytes.toMutableList(),
+                bgColor,
+                layerMetadata
+        )
+
+        fun String.isValidDescription() = this.length <= MAXIMUM_DESCRIPTION_LENGTH
+
+        fun String.validateDescription() =
+                require(this.length <= MAXIMUM_DESCRIPTION_LENGTH)
+                { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $this)" }
+
+        fun List<String>.isValidMaps() = this.size == NUMBER_OF_REFERENCED_MAPS
+
+        fun List<String>.validateMaps() =
+                require(this.size == NUMBER_OF_REFERENCED_MAPS)
+                { "maps.size != $NUMBER_OF_REFERENCED_MAPS (size: ${this.size})" }
+
+        fun List<Byte>.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
+
+        fun List<Byte>.validateUnknownBytes() =
+                require(this.size == NUMBER_OF_UNKNOWN_BYTES)
+                { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${this.size})" }
+
+        fun Map<TileLayer.Type, LayerMetadata>.isValidLayerMetadata() =
+                this.size == TileLayer.NUMBER_OF_TILE_LAYERS &&
+                this[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty()
+
+        fun Map<TileLayer.Type, LayerMetadata>.validateLayerMetadata() {
+            require(this.size == TileLayer.NUMBER_OF_TILE_LAYERS)
+            { "layerMetadata.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${this.size})" }
+            require(this[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty())
+            { "foreground tileset name may not be empty" }
+        }
     }
 }
 
@@ -139,9 +217,9 @@ internal data class LayerMetadata(
         /**
          * The name of the tileset used to display a tile layer in a PxPack map
          *
-         * Defaults to `"mpt00`
+         * Defaults to `"mpt00"`
          */
-        val tileset: String = "mpt00",
+        var tileset: String = "mpt00",
 
         /**
          * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack map
@@ -163,27 +241,39 @@ internal data class LayerMetadata(
          *
          * This class will probably eventually be replaced with an enum class
          */
-        val visibilityType: Byte = 2,
+        var visibilityType: Byte = 2,
 
         /**
          * The type of scrolling used to display a tile layer in a PxPack map
          *
          * Defaults to [ScrollType.NORMAL]
          */
-        val scrollType: ScrollType = ScrollType.NORMAL
+        var scrollType: ScrollType = ScrollType.NORMAL
 ) {
-    init {
-        tileset.validateName("tileset")
+    private val tilesetProperty = observable(LayerMetadata::tileset)
 
-        require(visibilityType in VISIBILITY_TYPE_RANGE)
-        { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $visibilityType)" }
-    }
+    fun tilesetProperty() = tilesetProperty
+
+    private val scrollTypeProperty = observable(LayerMetadata::scrollType)
+
+    fun scrollTypeProperty() = scrollTypeProperty
 
     companion object {
+        /*
+         * Since I'm not really sure what this byte is for, it doesn't seem right to validate it quite yet
+         * This program doesn't give any means to modify it anyway, so it can't be made invalid unless already
+         * invalid in the source file
+         */
         /**
          * The supposed valid range for [visibilityType] to occupy
          */
-        val VISIBILITY_TYPE_RANGE = 0..32
+        val VISIBILITY_TYPE_RANGE = 0..0xFF //0..32
+
+        fun Byte.isValidVisibilityType() = this in VISIBILITY_TYPE_RANGE
+
+        fun Byte.validateVisibilityType() =
+                require(this in VISIBILITY_TYPE_RANGE)
+                { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $this)" }
     }
 }
 

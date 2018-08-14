@@ -23,8 +23,6 @@ import javafx.collections.ObservableList
 import javafx.beans.property.ReadOnlyListProperty
 import javafx.beans.property.ReadOnlyListWrapper
 
-import javafx.beans.property.StringProperty
-
 import tornadofx.observable
 
 import io.fdeitylink.util.enumMapOf
@@ -60,8 +58,6 @@ internal class Head(
                 TileLayer.Type.BACKGROUND to LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
         )
 ) {
-    private val descriptionProperty = observable(Head::description)
-
     /**
      * A string used by the developer as a description of this PxPack field
      *
@@ -73,18 +69,14 @@ internal class Head(
             field = value
         }
 
-    fun descriptionProperty(): StringProperty = descriptionProperty
+    val descriptionProperty = observable(Head::description)
 
     /**
      * A set of up to four fields referenced by this PxPack field
      */
     val fields: ObservableList<String> = fields.toMutableList().observable()
 
-    private val fieldsProperty = ReadOnlyListWrapper(this, "fields", this.fields)
-
-    fun fieldsProperty(): ReadOnlyListProperty<String> = fieldsProperty
-
-    private val spritesheetProperty = observable(Head::spritesheet)
+    val fieldsProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(this, "fields", this.fields)
 
     /**
      * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
@@ -95,7 +87,7 @@ internal class Head(
             field = value
         }
 
-    fun spritesheetProperty(): StringProperty = spritesheetProperty
+    val spritesheetProperty = observable(Head::spritesheet)
 
     /**
      * A set of five bytes whose purpose is unknown
@@ -106,8 +98,6 @@ internal class Head(
             field = value
         }
 
-    private val bgColorProperty = observable(Head::bgColor)
-
     // TODO: Consider changing type to JavaFX Color
     /**
      * The background color of this PxPack field
@@ -115,7 +105,7 @@ internal class Head(
     @Suppress("CanBePrimaryConstructorProperty")
     var bgColor: BackgroundColor = bgColor
 
-    fun bgColorProperty() = bgColorProperty
+    val bgColorProperty = observable(Head::bgColor)
 
     // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
     /**

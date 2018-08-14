@@ -18,10 +18,6 @@ package io.fdeitylink.kero.field
 
 import java.util.Objects
 
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.IntegerProperty
-import javafx.beans.property.StringProperty
-
 import tornadofx.observable as objectObservable
 
 import io.fdeitylink.util.observable
@@ -46,8 +42,6 @@ internal class PxUnit(
     @Suppress("CanBePrimaryConstructorProperty")
     var flags: Byte = flags
 
-    private val typeProperty: ObjectProperty<Int> = objectObservable(PxUnit::type)
-
     // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
     /**
      * Represents the specific type of this unit
@@ -61,15 +55,13 @@ internal class PxUnit(
         field = value
     }*/
 
-    fun typeProperty() = typeProperty
+    val typeProperty = objectObservable(PxUnit::type)
 
     /**
      * A byte whose purpose is unknown
      */
     @Suppress("CanBePrimaryConstructorProperty")
     var unknownByte: Byte = unknownByte
-
-    private val xProperty: IntegerProperty = observable(PxUnit::x)
 
     /**
      * The x-coordinate of this unit in a PxPack field
@@ -80,9 +72,7 @@ internal class PxUnit(
             field = value
         }
 
-    fun xProperty() = xProperty
-
-    private val yProperty: IntegerProperty = observable(PxUnit::y)
+    val xProperty = observable(PxUnit::x)
 
     /**
      * The y-coordinate of this unit in a PxPack field
@@ -93,15 +83,13 @@ internal class PxUnit(
             field = value
         }
 
-    fun yProperty() = yProperty
+    val yProperty = observable(PxUnit::y)
 
     /**
      * A set of two bytes whose purpose is unknown
      */
     @Suppress("CanBePrimaryConstructorProperty")
     var unknownBytes: Pair<Byte, Byte> = unknownBytes
-
-    private val nameProperty: StringProperty = observable(PxUnit::name)
 
     /**
      * The name of this unit, for use in scripts
@@ -112,7 +100,7 @@ internal class PxUnit(
             field = value
         }
 
-    fun nameProperty() = nameProperty
+    val nameProperty = observable(PxUnit::name)
 
     init {
         //type.validateType()

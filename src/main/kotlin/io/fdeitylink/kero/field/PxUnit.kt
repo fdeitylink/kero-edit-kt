@@ -16,67 +16,134 @@
 
 package io.fdeitylink.kero.field
 
-import tornadofx.observable
+import java.util.Objects
+
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.IntegerProperty
+import javafx.beans.property.StringProperty
+
+import tornadofx.observable as objectObservable
 
 import io.fdeitylink.util.observable
+
+import io.fdeitylink.kero.validateName
 
 /**
  * Represents an individual unit in a PxPack field
  */
-internal data class PxUnit(
-        /**
-         * Potentially represents a set of flags for this unit
-         */
-        var flags: Byte,
-
-        // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
-        /**
-         * Represents the specific type of this unit
-         *
-         * Serves as a zero-based index into the unittype.txt file, which provides the actual type
-         */
-        var type: Int,
-
-        /**
-         * A byte whose purpose is unknown
-         */
-        var unknownByte: Byte,
-
-        /**
-         * The x-coordinate of this unit in a PxPack field
-         */
-        var x: Int,
-
-        /**
-         * The y-coordinate of this unit in a PxPack field
-         */
-        var y: Int,
-
-        /**
-         * A set of two bytes whose purpose is unknown
-         */
-        var unknownBytes: Pair<Byte, Byte>,
-
-        /**
-         * The name of this unit, for use in scripts
-         */
-        var name: String
+internal class PxUnit(
+        flags: Byte,
+        type: Int,
+        unknownByte: Byte,
+        x: Int,
+        y: Int,
+        unknownBytes: Pair<Byte, Byte>,
+        name: String
 ) {
-    private val typeProperty = observable(PxUnit::type)
+    /**
+     * Potentially represents a set of flags for this unit
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    var flags: Byte = flags
+
+    private val typeProperty: ObjectProperty<Int> = objectObservable(PxUnit::type)
+
+    // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
+    /**
+     * Represents the specific type of this unit
+     *
+     * Serves as a zero-based index into the unittype.txt file, which provides the actual type
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    var type: Int = type
+    /*set(value) {
+        type.validateType()
+        field = value
+    }*/
 
     fun typeProperty() = typeProperty
 
-    private val xProperty = observable(PxUnit::x)
+    /**
+     * A byte whose purpose is unknown
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    var unknownByte: Byte = unknownByte
+
+    private val xProperty: IntegerProperty = observable(PxUnit::x)
+
+    /**
+     * The x-coordinate of this unit in a PxPack field
+     */
+    var x: Int = x
+        set(value) {
+            value.validateCoordinate()
+            field = value
+        }
 
     fun xProperty() = xProperty
 
-    private val yProperty = observable(PxUnit::y)
+    private val yProperty: IntegerProperty = observable(PxUnit::y)
+
+    /**
+     * The y-coordinate of this unit in a PxPack field
+     */
+    var y: Int = y
+        set(value) {
+            value.validateCoordinate()
+            field = value
+        }
 
     fun yProperty() = yProperty
 
-    private val nameProperty = observable(PxUnit::name)
+    /**
+     * A set of two bytes whose purpose is unknown
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    var unknownBytes: Pair<Byte, Byte> = unknownBytes
+
+    private val nameProperty: StringProperty = observable(PxUnit::name)
+
+    /**
+     * The name of this unit, for use in scripts
+     */
+    var name: String = name
+        set(value) {
+            value.validateName("unit")
+            field = value
+        }
 
     fun nameProperty() = nameProperty
+
+    init {
+        //type.validateType()
+        x.validateCoordinate()
+        y.validateCoordinate()
+        name.validateName()
+    }
+
+    override fun equals(other: Any?) =
+            (this === other) ||
+            (other is PxUnit &&
+             flags == other.flags &&
+             type == other.type &&
+             unknownByte == other.unknownByte &&
+             x == other.x &&
+             y == other.y &&
+             unknownBytes == other.unknownBytes &&
+             name == other.name)
+
+    override fun hashCode() = Objects.hash(flags, type, unknownByte, x, y, unknownBytes, name)
+
+    override fun toString() =
+            "PxUnit(" +
+            "flags=$flags," +
+            "type=$type," +
+            "unknownByte=$unknownByte," +
+            "x=$x," +
+            "y=$y," +
+            "unknownBytes=$unknownBytes," +
+            "name='$name'" +
+            ")"
 
     companion object {
         // TODO: Consider moving this constant to PxPack

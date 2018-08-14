@@ -135,10 +135,9 @@ private fun PxUnit.Companion.fromChannel(chan: ReadableByteChannel) =
             val unknownByte = it.get()
 
             val x = it.getShort().toUInt()
-            validate(x in COORDINATE_RANGE) { "x must be in range $COORDINATE_RANGE (x: $x)" }
-
             val y = it.getShort().toUInt()
-            validate(y in COORDINATE_RANGE) { "y must be in range $COORDINATE_RANGE (y: $y)" }
+            validate(x in COORDINATE_RANGE && y in COORDINATE_RANGE)
+            { "coordinates must be in range $COORDINATE_RANGE (x: $x, y: $y)" }
 
             val unknownBytes = Pair(it.get(), it.get())
 

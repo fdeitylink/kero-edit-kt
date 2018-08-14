@@ -16,6 +16,8 @@
 
 package io.fdeitylink.kero.field
 
+import java.util.Objects
+
 import javafx.collections.ObservableList
 
 import javafx.beans.property.ReadOnlyListProperty
@@ -29,57 +31,30 @@ import io.fdeitylink.util.enumMapOf
 
 import io.fdeitylink.util.observable
 
+import io.fdeitylink.kero.validateName
+
 /**
  * Represents the head of a PxPack field
+ *
+ * @constructor
+ * Constructs a new [Head] object
+ *
+ * @param description Defaults to `""`
+ * @param fields All values are defaulted to `""`
+ * @param spritesheet Defaults to `""`
+ * @param unknownBytes All values are defaulted to `0`
+ * @param bgColor Defaults to `BackgroundColor(0, 0, 0)` (black)
+ * @param layerMetadata Defaults to: [FOREGROUND][TileLayer.Type.FOREGROUND] `--> LayerMetaData()`,
+ * [MIDDLEGROUND][TileLayer.Type.MIDDLEGROUND] `--> LayerMetadata(tileset = "")`,
+ * [BACKGROUND][TileLayer.Type.BACKGROUND] `--> LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)`
  */
-internal data class Head(
-        /**
-         * A string used by the developer as a description of this PxPack field
-         *
-         * Non-essential and not used by the game
-         *
-         * Defaults to `""`
-         */
-        var description: String = "",
-
-        /**
-         * A set of up to four fields referenced by this PxPack field
-         *
-         * All are defaulted to `""`
-         */
-        val fields: ObservableList<String> = MutableList(NUMBER_OF_REFERENCED_FIELDS) { "" }.observable(),
-
-        /**
-         * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
-         *
-         * Defaults to `""`
-         */
-        var spritesheet: String = "",
-
-        /**
-         * A set of five bytes whose purpose is unknown
-         *
-         * All are defaulted to `0`
-         */
-        var unknownBytes: MutableList<Byte> = MutableList(NUMBER_OF_UNKNOWN_BYTES) { 0.toByte() },
-
-        // TODO: Consider changing type to JavaFX Color
-        /**
-         * The background color of this PxPack field
-         *
-         * Defaults to `BackgroundColor(0, 0, 0)`
-         */
-        var bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
-
-        // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
-        /**
-         * A set of three tile layer property sets, where each corresponds to tile layer in this PxPack field
-         *
-         * Foreground defaults to `LayerMetaData()`,
-         * middleground defaults to `LayerMetadata(tileset = "")`,
-         * background defaults to `LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)`
-         */
-        val layerMetadata: Map<TileLayer.Type, LayerMetadata> = enumMapOf(
+internal class Head(
+        description: String = "",
+        fields: List<String> = MutableList(NUMBER_OF_REFERENCED_FIELDS) { "" },
+        spritesheet: String = "",
+        unknownBytes: ByteArray = ByteArray(NUMBER_OF_UNKNOWN_BYTES) { 0 },
+        bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
+        layerMetadata: Map<TileLayer.Type, LayerMetadata> = enumMapOf(
                 TileLayer.Type.FOREGROUND to LayerMetadata(),
                 TileLayer.Type.MIDDLEGROUND to LayerMetadata(tileset = ""),
                 TileLayer.Type.BACKGROUND to LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
@@ -87,19 +62,97 @@ internal data class Head(
 ) {
     private val descriptionProperty = observable(Head::description)
 
+    /**
+     * A string used by the developer as a description of this PxPack field
+     *
+     * Non-essential and not used by the game
+     */
+    var description: String = description
+        set(value) {
+            value.validateDescription()
+            field = value
+        }
+
     fun descriptionProperty(): StringProperty = descriptionProperty
 
-    private val fieldsProperty = ReadOnlyListWrapper(this, "fields", fields)
+    /**
+     * A set of up to four fields referenced by this PxPack field
+     */
+    val fields: ObservableList<String> = fields.toMutableList().observable()
+
+    private val fieldsProperty = ReadOnlyListWrapper(this, "fields", this.fields)
 
     fun fieldsProperty(): ReadOnlyListProperty<String> = fieldsProperty
 
     private val spritesheetProperty = observable(Head::spritesheet)
 
+    /**
+     * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
+     */
+    var spritesheet: String = spritesheet
+        set(value) {
+            value.validateName()
+            field = value
+        }
+
     fun spritesheetProperty(): StringProperty = spritesheetProperty
+
+    /**
+     * A set of five bytes whose purpose is unknown
+     */
+    var unknownBytes: ByteArray = unknownBytes
+        set(value) {
+            value.validateUnknownBytes()
+            field = value
+        }
 
     private val bgColorProperty = observable(Head::bgColor)
 
+    // TODO: Consider changing type to JavaFX Color
+    /**
+     * The background color of this PxPack field
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    var bgColor: BackgroundColor = bgColor
+
     fun bgColorProperty() = bgColorProperty
+
+    // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
+    /**
+     * A set of three tile layer metadata sets, where each corresponds to tile layer in this PxPack field
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    val layerMetadata: Map<TileLayer.Type, LayerMetadata> = layerMetadata
+
+    init {
+        description.validateDescription()
+        fields.validateFields()
+        spritesheet.validateName()
+        unknownBytes.validateUnknownBytes()
+        layerMetadata.validateLayerMetadata()
+    }
+
+    override fun equals(other: Any?) =
+            (this === other) ||
+            (other is Head &&
+             description == other.description &&
+             fields == other.fields &&
+             spritesheet == other.spritesheet &&
+             unknownBytes.contentEquals(other.unknownBytes) &&
+             bgColor == other.bgColor &&
+             layerMetadata == other.layerMetadata)
+
+    override fun hashCode() = Objects.hash(description, fields, spritesheet, unknownBytes, bgColor, layerMetadata)
+
+    override fun toString() =
+            "Head(" +
+            "description='$description'," +
+            "fields=$fields," +
+            "spritesheet='$spritesheet'," +
+            "unknownBytes=${unknownBytes.contentToString()}," +
+            "bgColor=$bgColor," +
+            "layerMetadata=$layerMetadata" +
+            ")"
 
     companion object {
         /**
@@ -123,33 +176,6 @@ internal data class Head(
          */
         const val NUMBER_OF_UNKNOWN_BYTES = 5
 
-        /*
-         * Making an invoke function on the companion object rather than a secondary constructor makes the expression
-         * `Head()` call the primary constructor of the class and eliminates an ambiguity error between two constructors.
-         * There is no real difference between the primary constructor and this function other than some of the parameter
-         * types being more general for this function, so even if this function were chosen over the primary constructor,
-         * it would make no difference.
-         */
-        operator fun invoke(
-                description: String = "",
-                fields: List<String> = List(NUMBER_OF_REFERENCED_FIELDS) { "" },
-                spritesheet: String = "",
-                unknownBytes: List<Byte> = List(NUMBER_OF_UNKNOWN_BYTES) { 0.toByte() },
-                bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
-                layerMetadata: Map<TileLayer.Type, LayerMetadata> = enumMapOf(
-                        TileLayer.Type.FOREGROUND to LayerMetadata(),
-                        TileLayer.Type.MIDDLEGROUND to LayerMetadata(tileset = ""),
-                        TileLayer.Type.BACKGROUND to LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
-                )
-        ) = Head(
-                description,
-                fields.toMutableList().observable(),
-                spritesheet,
-                unknownBytes.toMutableList(),
-                bgColor,
-                layerMetadata
-        )
-
         fun String.isValidDescription() = this.length <= MAXIMUM_DESCRIPTION_LENGTH
 
         fun String.validateDescription() =
@@ -162,9 +188,9 @@ internal data class Head(
                 require(this.size == NUMBER_OF_REFERENCED_FIELDS)
                 { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${this.size})" }
 
-        fun List<Byte>.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
+        fun ByteArray.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
 
-        fun List<Byte>.validateUnknownBytes() =
+        fun ByteArray.validateUnknownBytes() =
                 require(this.size == NUMBER_OF_UNKNOWN_BYTES)
                 { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${this.size})" }
 

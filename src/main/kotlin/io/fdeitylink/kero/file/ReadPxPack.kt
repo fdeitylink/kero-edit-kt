@@ -66,7 +66,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
 
     val unknownBytes = ByteBuffer.allocate(NUMBER_OF_UNKNOWN_BYTES).let {
         chan.read(it)
-        it.array().toList()
+        it.array().clone()
     }
 
     val bgColor = ByteBuffer.allocate(3).let {

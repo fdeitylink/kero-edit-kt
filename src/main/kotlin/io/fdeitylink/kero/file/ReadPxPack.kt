@@ -60,7 +60,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
     validate(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_LENGTH)
     { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
 
-    val fields = List(NUMBER_OF_REFERENCED_FIELDS) { nameFromChannel(chan, "field") }
+    val fields = Array(NUMBER_OF_REFERENCED_FIELDS) { nameFromChannel(chan, "field") }
 
     val spritesheet = nameFromChannel(chan, "spritesheet")
 

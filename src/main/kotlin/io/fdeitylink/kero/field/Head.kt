@@ -17,6 +17,7 @@
 package io.fdeitylink.kero.field
 
 import java.util.Objects
+import java.util.Arrays
 
 import javafx.collections.ObservableList
 
@@ -53,7 +54,7 @@ import io.fdeitylink.kero.validateName
  */
 internal class Head(
         description: String = "",
-        fields: List<String> = MutableList(NUMBER_OF_REFERENCED_FIELDS) { "" },
+        fields: Array<String> = Array(NUMBER_OF_REFERENCED_FIELDS) { "" },
         spritesheet: String = "",
         unknownBytes: ByteArray = ByteArray(NUMBER_OF_UNKNOWN_BYTES) { 0 },
         bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
@@ -78,11 +79,14 @@ internal class Head(
 
     val descriptionProperty = observable(Head::description)
 
-    // TODO: Prevent making too long
     /**
-     * A set of up to four fields referenced by this PxPack field
+     * A set of four fields referenced by this PxPack field
+     *
+     * Field names can be empty (i.e. `""`)
+     *
+     * @throws [UnsupportedOperationException] if any attempts to change the size of this list are made
      */
-    val fields: ObservableList<String> = fields.toMutableList().observable()
+    val fields: ObservableList<String> = Arrays.asList(*fields).observable()
 
     val fieldsProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(this, "fields", this.fields)
 
@@ -184,9 +188,9 @@ internal class Head(
                 require(description.length <= MAXIMUM_DESCRIPTION_LENGTH)
                 { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
 
-        fun List<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS && this.all(String::isValidName)
+        fun Array<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS && this.all(String::isValidName)
 
-        fun validateFields(fields: List<String>) {
+        fun validateFields(fields: Array<String>) {
             require(fields.size == NUMBER_OF_REFERENCED_FIELDS)
             { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${fields.size})" }
 

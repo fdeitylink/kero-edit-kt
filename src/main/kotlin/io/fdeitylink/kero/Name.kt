@@ -32,8 +32,8 @@ internal fun String.isValidName() = this.toByteArray(CHARSET).size <= MAXIMUM_NA
  *
  * @param type What this name is used for (used for exception message)
  */
-internal fun String.validateName(type: String = "") {
-    require(this.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH)
-    { "$type name length must be <= $MAXIMUM_NAME_BYTE_LENGTH (name: $this)" }
-    require(' ' !in this) { "$type name may not contain spaces (name: $this)" }
+internal fun validateName(name: String, type: String = "") {
+    require(name.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH)
+    { "$type name length must be <= $MAXIMUM_NAME_BYTE_LENGTH (name: $name)" }
+    require(' ' !in name) { "$type name may not contain spaces (name: $name)" }
 }

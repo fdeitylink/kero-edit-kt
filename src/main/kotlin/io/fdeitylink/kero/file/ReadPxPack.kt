@@ -147,7 +147,7 @@ private fun PxUnit.Companion.fromChannel(chan: ReadableByteChannel) =
         }
 
 private fun nameFromChannel(chan: ReadableByteChannel, type: String = "") =
-        String.fromChannel(chan).also { it.validateName(type) }
+        String.fromChannel(chan).also { validateName(it, type) }
 
 private fun String.Companion.fromChannel(chan: ReadableByteChannel): String {
     val len = ByteBuffer.allocate(1).let {

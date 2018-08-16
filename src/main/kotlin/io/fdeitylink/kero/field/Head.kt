@@ -45,6 +45,10 @@ import io.fdeitylink.kero.validateName
  * @param layerMetadata Defaults to: [FOREGROUND][TileLayer.Type.FOREGROUND] `--> LayerMetaData()`,
  * [MIDDLEGROUND][TileLayer.Type.MIDDLEGROUND] `--> LayerMetadata(tileset = "")`,
  * [BACKGROUND][TileLayer.Type.BACKGROUND] `--> LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)`
+ *
+ * @throws [IllegalArgumentException] if [fields] has a size other than [NUMBER_OF_REFERENCED_FIELDS],
+ * [layerMetadata] does not have a key-value pair for every member of [TileLayer.Type], or if an argument
+ * has an invalid value as per its corresponding property's documentation
  */
 internal class Head(
         description: String = "",
@@ -62,15 +66,18 @@ internal class Head(
      * A string used by the developer as a description of this PxPack field
      *
      * Non-essential and not used by the game
+     *
+     * @throws [IllegalArgumentException] if set to a value whose length is greater than [MAXIMUM_DESCRIPTION_LENGTH]
      */
     var description: String = description
         set(value) {
-            value.validateDescription()
+            validateDescription(value)
             field = value
         }
 
     val descriptionProperty = observable(Head::description)
 
+    // TODO: Prevent making too long
     /**
      * A set of up to four fields referenced by this PxPack field
      */
@@ -80,10 +87,12 @@ internal class Head(
 
     /**
      * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
+     *
+     * @throws [IllegalArgumentException] if set to an invalid name (as per [validateName])
      */
     var spritesheet: String = spritesheet
         set(value) {
-            value.validateName()
+            validateName(value, "spritesheet")
             field = value
         }
 
@@ -91,10 +100,12 @@ internal class Head(
 
     /**
      * A set of five bytes whose purpose is unknown
+     *
+     * @throws [IllegalArgumentException] if set to a [ByteArray] whose size is not equal to [NUMBER_OF_UNKNOWN_BYTES]
      */
     var unknownBytes: ByteArray = unknownBytes
         set(value) {
-            value.validateUnknownBytes()
+            validateUnknownBytes(value)
             field = value
         }
 
@@ -115,11 +126,11 @@ internal class Head(
     val layerMetadata: Map<TileLayer.Type, LayerMetadata> = layerMetadata
 
     init {
-        description.validateDescription()
-        fields.validateFields()
-        spritesheet.validateName()
-        unknownBytes.validateUnknownBytes()
-        layerMetadata.validateLayerMetadata()
+        validateDescription(description)
+        validateFields(fields)
+        validateName(spritesheet, "spritesheet")
+        validateUnknownBytes(unknownBytes)
+        validateLayerMetadata(layerMetadata)
     }
 
     override fun equals(other: Any?) =
@@ -168,30 +179,31 @@ internal class Head(
 
         fun String.isValidDescription() = this.length <= MAXIMUM_DESCRIPTION_LENGTH
 
-        fun String.validateDescription() =
-                require(this.length <= MAXIMUM_DESCRIPTION_LENGTH)
-                { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $this)" }
+        fun validateDescription(description: String) =
+                require(description.length <= MAXIMUM_DESCRIPTION_LENGTH)
+                { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
 
         fun List<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS
 
-        fun List<String>.validateFields() =
-                require(this.size == NUMBER_OF_REFERENCED_FIELDS)
-                { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${this.size})" }
+        fun validateFields(fields: List<String>) =
+                require(fields.size == NUMBER_OF_REFERENCED_FIELDS)
+                { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${fields.size})" }
 
         fun ByteArray.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
 
-        fun ByteArray.validateUnknownBytes() =
-                require(this.size == NUMBER_OF_UNKNOWN_BYTES)
-                { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${this.size})" }
+        fun validateUnknownBytes(unknownBytes: ByteArray) =
+                require(unknownBytes.size == NUMBER_OF_UNKNOWN_BYTES)
+                { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${unknownBytes.size})" }
 
         fun Map<TileLayer.Type, LayerMetadata>.isValidLayerMetadata() =
                 this.size == TileLayer.NUMBER_OF_TILE_LAYERS &&
                 this[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty()
 
-        fun Map<TileLayer.Type, LayerMetadata>.validateLayerMetadata() {
-            require(this.size == TileLayer.NUMBER_OF_TILE_LAYERS)
-            { "layerMetadata.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${this.size})" }
-            require(this[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty())
+        fun validateLayerMetadata(layerMetadata: Map<TileLayer.Type, LayerMetadata>) {
+            require(layerMetadata.size == TileLayer.NUMBER_OF_TILE_LAYERS)
+            { "layerMetadata.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerMetadata.size})" }
+
+            require(layerMetadata[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty())
             { "foreground tileset name may not be empty" }
         }
     }
@@ -287,9 +299,9 @@ internal data class LayerMetadata(
 
         fun Byte.isValidVisibilityType() = this in VISIBILITY_TYPE_RANGE
 
-        fun Byte.validateVisibilityType() =
-                require(this in VISIBILITY_TYPE_RANGE)
-                { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $this)" }
+        fun validateVisibilityType(type: Byte) =
+                require(type in VISIBILITY_TYPE_RANGE)
+                { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $type)" }
     }
 }
 

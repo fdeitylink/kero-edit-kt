@@ -26,6 +26,11 @@ import io.fdeitylink.kero.validateName
 
 /**
  * Represents an individual unit in a PxPack field
+ *
+ * @constructor
+ * Constructs a new [PxUnit] object
+ *
+ * @throws [IllegalArgumentException] if an argument has an invalid value as per its corresponding property's documentation
  */
 internal class PxUnit(
         flags: Byte,
@@ -65,10 +70,12 @@ internal class PxUnit(
 
     /**
      * The x-coordinate of this unit in a PxPack field
+     *
+     * @throws [IllegalArgumentException] if set to value outside [COORDINATE_RANGE]
      */
     var x: Int = x
         set(value) {
-            value.validateCoordinate()
+            validateCoordinate(value)
             field = value
         }
 
@@ -76,10 +83,12 @@ internal class PxUnit(
 
     /**
      * The y-coordinate of this unit in a PxPack field
+     *
+     * @throws [IllegalArgumentException] if set to a value outside [COORDINATE_RANGE]
      */
     var y: Int = y
         set(value) {
-            value.validateCoordinate()
+            validateCoordinate(value)
             field = value
         }
 
@@ -93,20 +102,22 @@ internal class PxUnit(
 
     /**
      * The name of this unit, for use in scripts
+     *
+     * @throws [IllegalArgumentException] if set to an invalid name (as per [validateName])
      */
     var name: String = name
         set(value) {
-            value.validateName("unit")
+            validateName(value, "unit")
             field = value
         }
 
     val nameProperty = observable(PxUnit::name)
 
     init {
-        //type.validateType()
-        x.validateCoordinate()
-        y.validateCoordinate()
-        name.validateName()
+        validateType(type)
+        validateCoordinate(x)
+        validateCoordinate(y)
+        validateName(name, "unit")
     }
 
     override fun equals(other: Any?) =
@@ -153,13 +164,14 @@ internal class PxUnit(
 
         fun Int.isValidType() = this in UNIT_TYPE_RANGE
 
-        fun Int.validateType() =
-                require(this in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $this)" }
+        fun validateType(type: Int) =
+                require(type in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
 
         fun Int.isValidCoordinate() = this in COORDINATE_RANGE
 
-        fun Int.validateCoordinate() =
-                require(this in COORDINATE_RANGE) { "coordinate must be in range $COORDINATE_RANGE (coordinate: $this)" }
+        fun validateCoordinate(coordinate: Int) =
+                require(coordinate in COORDINATE_RANGE)
+                { "coordinate must be in range $COORDINATE_RANGE (coordinate: $coordinate)" }
     }
 
     /**

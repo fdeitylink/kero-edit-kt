@@ -244,51 +244,87 @@ internal data class BackgroundColor(
 
 /**
  * Represents the metadata for a [tile layer][TileLayer] in a PxPack field
+ *
+ * @constructor
+ * Constructs a new [LayerMetadata] object
+ *
+ * @param tileset Defaults to `"mpt00"`
+ * @param visibilityType Defaults to `2`
+ * @param scrollType Defaults to [ScrollType.NORMAL]
+ *
+ * @throws [IllegalArgumentException] if an argument has an invalid value as per its corresponding property's documentation
  */
-internal data class LayerMetadata(
-        /**
-         * The name of the tileset used to display a tile layer in a PxPack field
-         *
-         * Defaults to `"mpt00"`
-         */
-        var tileset: String = "mpt00",
-
-        /**
-         * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack field
-         *
-         * Defaults to `2`
-         *
-         * Still not sure whether or not the byte in the file actually represents any kind of visibility toggle
-         * or setting, but when modifying the byte in a file the visibility of a particular layer would be changed.
-         *
-         * When set to:
-         *
-         * * `0`, the layer becomes invisible
-         *
-         * * `2`, the layer is visible (the byte usually holds this value)
-         *
-         * * `1` or `3..32`, the wrong tiles are pulled but from the correct tileset (maybe an offset is applied?)
-         *
-         * * `33..`, the game crashes
-         *
-         * This class will probably eventually be replaced with an enum class
-         */
-        var visibilityType: Byte = 2,
-
-        /**
-         * The type of scrolling used to display a tile layer in a PxPack field
-         *
-         * Defaults to [ScrollType.NORMAL]
-         */
-        var scrollType: ScrollType = ScrollType.NORMAL
+internal class LayerMetadata(
+        tileset: String = "mpt00",
+        visibilityType: Byte = 2,
+        scrollType: ScrollType = ScrollType.NORMAL
 ) {
-    private val tilesetProperty = observable(LayerMetadata::tileset)
+    /**
+     * The name of the tileset used to display a tile layer in a PxPack field
+     *
+     * @throws [IllegalArgumentException] if set to an invalid name (as per [validateName])
+     */
+    var tileset: String = tileset
+        set(value) {
+            validateName(value)
+            field = value
+        }
 
-    fun tilesetProperty() = tilesetProperty
+    val tilesetProperty = observable(LayerMetadata::tileset)
 
-    private val scrollTypeProperty = observable(LayerMetadata::scrollType)
+    /**
+     * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack field
+     *
+     * Still not sure whether or not the byte in the file actually represents any kind of visibility toggle
+     * or setting, but when modifying the byte in a file the visibility of a particular layer would be changed.
+     *
+     * When set to:
+     *
+     * * `0`, the layer becomes invisible
+     *
+     * * `2`, the layer is visible (the byte usually holds this value)
+     *
+     * * `1` or `3..32`, the wrong tiles are pulled but from the correct tileset (maybe an offset is applied?)
+     *
+     * * `33..`, the game crashes
+     *
+     * This class will probably eventually be replaced with an enum class
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    var visibilityType: Byte = visibilityType
+    /*set(value) {
+        validateVisibilityType(value)
+        field = value
+    }*/
 
-    fun scrollTypeProperty() = scrollTypeProperty
+    /**
+     * The type of scrolling used to display a tile layer in a PxPack field
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    var scrollType: ScrollType = scrollType
+
+    val scrollTypeProperty = observable(LayerMetadata::scrollType)
+
+    init {
+        validateName(tileset)
+        //validateVisibilityType(visibilityType)
+    }
+
+    override fun equals(other: Any?) =
+            (this === other) ||
+            (other is LayerMetadata &&
+             tileset == other.tileset &&
+             visibilityType == other.visibilityType &&
+             scrollType == other.scrollType)
+
+    override fun hashCode() = Objects.hash(tileset, visibilityType, scrollType)
+
+    override fun toString() =
+            "LayerMetadata(" +
+            "tileset='$tileset'," +
+            "visibilityType=$visibilityType," +
+            "scrollType=$scrollType" +
+            ")"
 
     companion object {
         /*

@@ -16,6 +16,8 @@
 
 package io.fdeitylink.kero
 
+import io.fdeitylink.util.validate
+
 /**
  * The maximum number of bytes a name may use when using the SJIS charset
  */
@@ -28,12 +30,16 @@ const val MAXIMUM_NAME_BYTE_LENGTH = 15
 internal fun String.isValidName() = this.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH && ' ' !in this
 
 /**
- * Throws an [IllegalArgumentException] if `this` name is invalid (as per [isValidName])
+ * Constructs and throws an exception (using [exceptCtor]) if `this` name is invalid (as per [isValidName])
  *
  * @param type What this name is used for (used for exception message)
  */
-internal fun validateName(name: String, type: String = "") {
-    require(name.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH)
+internal fun validateName(
+        name: String,
+        type: String = "",
+        exceptCtor: (String) -> Exception = ::IllegalArgumentException
+) {
+    validate(name.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH, exceptCtor)
     { "$type name length must be <= $MAXIMUM_NAME_BYTE_LENGTH (name: $name)" }
-    require(' ' !in name) { "$type name may not contain spaces (name: $name)" }
+    validate(' ' !in name, exceptCtor) { "$type name may not contain spaces (name: $name)" }
 }

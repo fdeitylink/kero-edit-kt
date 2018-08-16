@@ -27,8 +27,6 @@ import io.fdeitylink.util.toUInt
 
 import io.fdeitylink.util.toEnumMap
 
-import io.fdeitylink.kero.CHARSET
-
 import io.fdeitylink.kero.field.PxPack
 import io.fdeitylink.kero.field.Head
 import io.fdeitylink.kero.field.BackgroundColor
@@ -57,8 +55,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
     validateHeader(chan, HEADER_STRING, "PxPack")
 
     val description = String.fromChannel(chan)
-    validate(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_LENGTH)
-    { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
+    Head.validateDescription(description, ::ParseException)
 
     val fields = Array(NUMBER_OF_REFERENCED_FIELDS) { nameFromChannel(chan, "field") }
 
@@ -84,8 +81,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
                     it.flip()
 
                     val vis = it.get()
-                    /*validate(vis in LayerMetadata.VISIBILITY_TYPE_RANGE)
-                    { "visibility type must be in range ${LayerMetadata.VISIBILITY_TYPE_RANGE} (type: $vis)" }*/
+                    //LayerMetadata.validateVisibilityType(vis, ::ParseException)
 
                     val scrollIndex = it.get().toUInt()
                     validate(scrollIndex < ScrollType.NUMBER_OF_SCROLL_TYPES)
@@ -130,14 +126,14 @@ private fun PxUnit.Companion.fromChannel(chan: ReadableByteChannel) =
             val flags = it.get()
 
             val type = it.get().toUInt()
-            //validate(type in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
+            //PxUnit.validateType(type, ::ParseException)
 
             val unknownByte = it.get()
 
             val x = it.getShort().toUInt()
             val y = it.getShort().toUInt()
-            validate(x in COORDINATE_RANGE && y in COORDINATE_RANGE)
-            { "coordinates must be in range $COORDINATE_RANGE (x: $x, y: $y)" }
+            PxUnit.validateCoordinate(x, ::ParseException)
+            PxUnit.validateCoordinate(y, ::ParseException)
 
             val unknownBytes = Pair(it.get(), it.get())
 
@@ -147,14 +143,7 @@ private fun PxUnit.Companion.fromChannel(chan: ReadableByteChannel) =
         }
 
 private fun nameFromChannel(chan: ReadableByteChannel, type: String = "") =
-        String.fromChannel(chan).also {
-            try {
-                validateName(it, type)
-            }
-            catch (e: IllegalArgumentException) {
-                throw ParseException(e)
-            }
-        }
+        String.fromChannel(chan).also { validateName(it, type, ::ParseException) }
 
 private fun String.Companion.fromChannel(chan: ReadableByteChannel): String {
     val len = ByteBuffer.allocate(1).let {

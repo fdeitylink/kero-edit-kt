@@ -19,6 +19,8 @@ package io.fdeitylink.kero.file
 import java.nio.channels.ReadableByteChannel
 import java.nio.ByteBuffer
 
+import io.fdeitylink.util.validate as genericValidate
+
 import io.fdeitylink.kero.CHARSET
 
 internal fun validateHeader(chan: ReadableByteChannel, header: String, type: String) {
@@ -29,10 +31,7 @@ internal fun validateHeader(chan: ReadableByteChannel, header: String, type: Str
     }
 }
 
-internal inline fun validate(value: Boolean, lazyMessage: () -> Any) {
-    if (!value) {
-        throw ParseException(lazyMessage().toString())
-    }
-}
+internal inline fun validate(value: Boolean, lazyMessage: () -> Any) =
+        genericValidate(value, ::ParseException, lazyMessage)
 
 internal fun String.Companion.fromBytes(bytes: ByteArray) = String(bytes, CHARSET)

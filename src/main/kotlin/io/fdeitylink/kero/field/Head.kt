@@ -28,6 +28,8 @@ import tornadofx.observable
 
 import io.fdeitylink.util.enumMapOf
 
+import io.fdeitylink.util.validate
+
 import io.fdeitylink.util.observable
 
 import io.fdeitylink.kero.CHARSET
@@ -187,34 +189,40 @@ internal class Head(
 
         fun String.isValidDescription() = this.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH
 
-        fun validateDescription(description: String) =
-                require(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH)
+        fun validateDescription(description: String, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
+                validate(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH, exceptCtor)
                 { "description bytes length must be <= $MAXIMUM_DESCRIPTION_BYTE_LENGTH (description: $description)" }
 
         fun Array<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS && this.all(String::isValidName)
 
-        fun validateFields(fields: Array<String>) {
-            require(fields.size == NUMBER_OF_REFERENCED_FIELDS)
+        fun validateFields(fields: Array<String>, exceptCtor: (String) -> Exception = ::IllegalArgumentException) {
+            validate(fields.size == NUMBER_OF_REFERENCED_FIELDS, exceptCtor)
             { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${fields.size})" }
 
-            fields.forEach { validateName(it, "field") }
+            fields.forEach { validateName(it, "field", exceptCtor) }
         }
 
         fun ByteArray.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
 
-        fun validateUnknownBytes(unknownBytes: ByteArray) =
-                require(unknownBytes.size == NUMBER_OF_UNKNOWN_BYTES)
+        fun validateUnknownBytes(
+                unknownBytes: ByteArray,
+                exceptCtor: (String) -> Exception = ::IllegalArgumentException
+        ) =
+                validate(unknownBytes.size == NUMBER_OF_UNKNOWN_BYTES, exceptCtor)
                 { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${unknownBytes.size})" }
 
         fun Map<TileLayer.Type, LayerMetadata>.isValidLayerMetadata() =
                 this.size == TileLayer.NUMBER_OF_TILE_LAYERS &&
                 this[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty()
 
-        fun validateLayerMetadata(layerMetadata: Map<TileLayer.Type, LayerMetadata>) {
-            require(layerMetadata.size == TileLayer.NUMBER_OF_TILE_LAYERS)
+        fun validateLayerMetadata(
+                layerMetadata: Map<TileLayer.Type, LayerMetadata>,
+                exceptCtor: (String) -> Exception = ::IllegalArgumentException
+        ) {
+            validate(layerMetadata.size == TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
             { "layerMetadata.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerMetadata.size})" }
 
-            require(layerMetadata[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty())
+            validate(layerMetadata[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty(), exceptCtor)
             { "foreground tileset name may not be empty" }
         }
     }
@@ -346,8 +354,8 @@ internal class LayerMetadata(
 
         fun Byte.isValidVisibilityType() = this in VISIBILITY_TYPE_RANGE
 
-        fun validateVisibilityType(type: Byte) =
-                require(type in VISIBILITY_TYPE_RANGE)
+        fun validateVisibilityType(type: Byte, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
+                validate(type in VISIBILITY_TYPE_RANGE, exceptCtor)
                 { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $type)" }
     }
 }

@@ -20,6 +20,8 @@ import java.util.Objects
 
 import tornadofx.observable as objectObservable
 
+import io.fdeitylink.util.validate
+
 import io.fdeitylink.util.observable
 
 import io.fdeitylink.kero.validateName
@@ -164,13 +166,13 @@ internal class PxUnit(
 
         fun Int.isValidType() = this in UNIT_TYPE_RANGE
 
-        fun validateType(type: Int) =
-                require(type in UNIT_TYPE_RANGE) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
+        fun validateType(type: Int, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
+                validate(type in UNIT_TYPE_RANGE, exceptCtor) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
 
         fun Int.isValidCoordinate() = this in COORDINATE_RANGE
 
-        fun validateCoordinate(coordinate: Int) =
-                require(coordinate in COORDINATE_RANGE)
+        fun validateCoordinate(coordinate: Int, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
+                validate(coordinate in COORDINATE_RANGE, exceptCtor)
                 { "coordinate must be in range $COORDINATE_RANGE (coordinate: $coordinate)" }
     }
 

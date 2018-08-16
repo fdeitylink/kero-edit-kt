@@ -29,6 +29,7 @@ import io.fdeitylink.util.enumMapOf
 
 import io.fdeitylink.util.observable
 
+import io.fdeitylink.kero.isValidName
 import io.fdeitylink.kero.validateName
 
 /**
@@ -183,11 +184,14 @@ internal class Head(
                 require(description.length <= MAXIMUM_DESCRIPTION_LENGTH)
                 { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
 
-        fun List<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS
+        fun List<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS && this.all(String::isValidName)
 
-        fun validateFields(fields: List<String>) =
-                require(fields.size == NUMBER_OF_REFERENCED_FIELDS)
-                { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${fields.size})" }
+        fun validateFields(fields: List<String>) {
+            require(fields.size == NUMBER_OF_REFERENCED_FIELDS)
+            { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${fields.size})" }
+
+            fields.forEach { validateName(it, "field") }
+        }
 
         fun ByteArray.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
 

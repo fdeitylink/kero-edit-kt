@@ -30,6 +30,8 @@ import io.fdeitylink.util.enumMapOf
 
 import io.fdeitylink.util.observable
 
+import io.fdeitylink.kero.CHARSET
+
 import io.fdeitylink.kero.isValidName
 import io.fdeitylink.kero.validateName
 
@@ -69,7 +71,8 @@ internal class Head(
      *
      * Non-essential and not used by the game
      *
-     * @throws [IllegalArgumentException] if set to a value whose length is greater than [MAXIMUM_DESCRIPTION_LENGTH]
+     * @throws [IllegalArgumentException] if set to a value whose length in bytes when using the SJIS charset
+     * is greater than [MAXIMUM_DESCRIPTION_BYTE_LENGTH]
      */
     var description: String = description
         set(value) {
@@ -168,9 +171,9 @@ internal class Head(
         const val HEADER_STRING = "PXPACK121127a**\u0000"
 
         /**
-         * The maximum length of the description string in a PxPack field
+         * The maximum number of bytes the description string in a PxPack field may use when using the SJIS charset
          */
-        const val MAXIMUM_DESCRIPTION_LENGTH = 31
+        const val MAXIMUM_DESCRIPTION_BYTE_LENGTH = 31
 
         /**
          * The number of fields that are referenced by a PxPack field
@@ -182,11 +185,11 @@ internal class Head(
          */
         const val NUMBER_OF_UNKNOWN_BYTES = 5
 
-        fun String.isValidDescription() = this.length <= MAXIMUM_DESCRIPTION_LENGTH
+        fun String.isValidDescription() = this.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH
 
         fun validateDescription(description: String) =
-                require(description.length <= MAXIMUM_DESCRIPTION_LENGTH)
-                { "description length must be <= $MAXIMUM_DESCRIPTION_LENGTH (description: $description)" }
+                require(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH)
+                { "description bytes length must be <= $MAXIMUM_DESCRIPTION_BYTE_LENGTH (description: $description)" }
 
         fun Array<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS && this.all(String::isValidName)
 

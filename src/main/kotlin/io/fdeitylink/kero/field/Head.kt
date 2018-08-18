@@ -93,15 +93,32 @@ internal class Head(
      */
     var description: String by descriptionProperty
 
-    // TODO: Prevent setting names to invalid values
+    private val fieldsBacking = Arrays.asList(*fields).observable()
+
     /**
      * A set of four fields referenced by this PxPack field
      *
      * Field names can be empty (i.e. `""`)
      *
-     * @throws [UnsupportedOperationException] if any attempts to change the size of this list are made
+     * @throws [IllegalArgumentException] if an attempt is made to set an element to an invalid value as per [isValidName]
+     * @throws [UnsupportedOperationException] if an attempt to change the size of this list is made
      */
-    val fields: ObservableList<String> = Arrays.asList(*fields).observable()
+    val fields = object : ObservableList<String> by fieldsBacking {
+        override fun set(index: Int, element: String): String {
+            validateName(element, "field")
+            return fieldsBacking.set(index, element)
+        }
+
+        override fun setAll(col: MutableCollection<out String>): Boolean {
+            col.forEach { validateName(it, "field") }
+            return fieldsBacking.setAll(col)
+        }
+
+        override fun setAll(vararg elements: String): Boolean {
+            elements.forEach { validateName(it, "field") }
+            return fieldsBacking.setAll(*elements)
+        }
+    }
 
     val fieldsProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(this.fields)
 

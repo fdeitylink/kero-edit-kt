@@ -16,67 +16,92 @@
 
 package io.fdeitylink.kero.tile
 
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.immutableListOf
-import kotlinx.collections.immutable.toImmutableList
+import java.util.Objects
 
+import javafx.beans.Observable
+import javafx.beans.InvalidationListener
+
+import io.fdeitylink.util.validate
+
+// TODO: Consider implementing your own change listeners that give more information
+// TODO: Consider defaulting attributes to those in mpt00 file if possible
+// TODO: Consider changing tiles to Array<ByteArray>
+// TODO: Consider implementing Collection instead of Iterable
 /**
  * Represents a set of tile attributes for a tileset
  *
  * @constructor
- * Constructs a new [PxAttr] with the given `attributes`
+ * Constructs a new [PxAttr] with the given [attributes]
  *
- * If no argument is passed for `attributes`, all attributes will be initialized to `0`
+ * @param attributes All values are defaulted to `0`
  *
- * @throws IllegalArgumentException if the size of attributes is not equal to the product of [WIDTH] and [HEIGHT],
- *                                  or if any attributes are not in the range [ATTRIBUTE_RANGE]
+ * @throws [IllegalArgumentException] if [attributes] is invalid as per [isValidAttributes]
  */
-internal class PxAttr(attributes: List<TileAttribute> = immutableListOf(*Array(WIDTH * HEIGHT) { 0 })) {
-    private val _attributes: ImmutableList<TileAttribute> = attributes.toImmutableList()
-
-    /**
-     * The set of attributes for some tileset
-     */
-    inline val attributes: List<TileAttribute> get() = _attributes
-
+internal class PxAttr(
+        attributes: Array<IntArray> = Array(HEIGHT) { IntArray(WIDTH) }
+) : Iterable<Int>, Observable {
     init {
-        require(attributes.size == size) { "attributes.size != $size (size: ${attributes.size})" }
-
-        require(attributes.all { it in ATTRIBUTE_RANGE }) { "all attributes must be in range $ATTRIBUTE_RANGE" }
+        validateAttributes(attributes)
     }
 
-    /**
-     * Returns the attribute in this [PxAttr] with the given coordinates
-     */
-    operator fun get(x: Int, y: Int) = _attributes[x, y]
+    // If I did assignment without copying, modifying attributes without the set function would be possible
+    private val attributes = attributes.map(IntArray::clone).toTypedArray()
+
+    private val listeners = mutableListOf<InvalidationListener>()
 
     /**
-     * Returns a copy of this [PxAttr] with the attribute at the specified coordinates replaced with the given [attribute]
+     * Returns the tile attribute in this [PxAttr] with the given coordinates
      */
-    fun set(x: Int, y: Int, attribute: TileAttribute): PxAttr {
-        require(attribute in ATTRIBUTE_RANGE) { "attribute must be in range $ATTRIBUTE_RANGE (attribute: $attribute)" }
+    operator fun get(x: Int, y: Int) = attributes[y][x]
 
-        return if (_attributes[x, y] == attribute) this else PxAttr(_attributes.set(Pair(x, y).toIndex(), attribute))
+    /**
+     * Replaces the tile attribute in this [PxAttr] at the given coordinates with the given [attribute]
+     *
+     * @throws [IllegalArgumentException] if [attribute] is outside the range [TILE_ATTRIBUTE_RANGE]
+     */
+    operator fun set(x: Int, y: Int, attribute: Int) {
+        validateAttribute(attribute)
+
+        val oldAttribute = attributes[y][x]
+
+        if (oldAttribute != attribute) {
+            attributes[y][x] = attribute
+            listeners.forEach { it.invalidated(this) }
+        }
     }
 
-    override fun equals(other: Any?) = (this === other) || (other is PxAttr && other._attributes == _attributes)
+    override fun addListener(listener: InvalidationListener) {
+        listeners += listener
+    }
 
-    override fun hashCode() = _attributes.hashCode()
+    override fun removeListener(listener: InvalidationListener) {
+        listeners -= listener
+    }
 
-    override fun toString() =
-            _attributes.chunked(WIDTH).joinToString(separator = " ") {
-                it.joinToString(separator = " ", postfix = "\n") { String.format("%02X", it) }
+    override fun iterator() = object : IntIterator() {
+        var x = 0
+        var y = 0
+
+        override fun hasNext() = y != HEIGHT
+
+        override fun nextInt(): Int {
+            val ret = attributes[y][x++]
+            if (x == WIDTH) {
+                x = 0
+                y++
             }
+            return ret
+        }
+    }
 
-    private operator fun ImmutableList<TileAttribute>.get(x: Int, y: Int) = get(Pair(x, y).toIndex())
+    override fun equals(other: Any?) =
+            (this === other) ||
+            (other is PxAttr &&
+             attributes.contentDeepEquals(other.attributes))
 
-    private operator fun Int.component1() = this % WIDTH
+    override fun hashCode() = Objects.hash(attributes)
 
-    private operator fun Int.component2() = this / WIDTH
-
-    private fun Int.toCoordinates(width: Int = PxAttr.WIDTH) = Pair(this % width, this / width)
-
-    private fun Pair<Int, Int>.toIndex(width: Int = PxAttr.WIDTH) = this.let { (x, y) -> x + y * width }
+    // TODO: Consider overriding toString() (don't want to display attributes & width + height are constant)
 
     companion object {
         /**
@@ -95,34 +120,98 @@ internal class PxAttr(attributes: List<TileAttribute> = immutableListOf(*Array(W
         const val HEIGHT = 16
 
         /**
-         * The valid range for [TileAttributes][TileAttribute] to occupy
+         * The valid range for tile attributes to occupy
          *
          * Equivalent to the positive range of a signed byte (`0..0x7F`)
          */
-        val ATTRIBUTE_RANGE = 0..0x7F
+        val TILE_ATTRIBUTE_RANGE = 0..0x7F
+
+        /**
+         * Given an [Int] representing an index, returns a [Pair] of x and y coordinates.
+         * Useful for using methods like `forEachIndexed` on this class.
+         */
+        fun indexToCoordinates(index: Int) = Pair(index % WIDTH, index / WIDTH)
+
+        /**
+         * Given a [Pair] representing a set of (x, y) coordinates, returns an [Int] representing an index.
+         * Useful for using methods like `elementAt` on this class.
+         */
+        fun coordinatesToIndex(coordinates: Pair<Int, Int>) = coordinates.let { (x, y) -> x + y * WIDTH }
+
+        // TODO: Unify the *Width() & *Height() methods
+
+        /**
+         * Returns `true` if `this` equals [WIDTH], `false` otherwise
+         */
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun Int.isValidWidth() = this == WIDTH
+
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [width] does not equal [WIDTH]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
+        fun validateWidth(width: Int, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
+                validate(width == WIDTH, exceptCtor) { "width != $WIDTH (width: $width)" }
+
+        /**
+         * Returns `true` if `this` equals [HEIGHT], `false` otherwise
+         */
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun Int.isValidHeight() = this == HEIGHT
+
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [height] does not equal [HEIGHT]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
+        fun validateHeight(height: Int, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
+                validate(height == HEIGHT, exceptCtor) { "height != $HEIGHT (height: $height)" }
+
+        /**
+         * Returns `true` if `this` attribute is in the range [TILE_ATTRIBUTE_RANGE], `false` otherwise
+         */
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun Int.isValidAttribute() = this in TILE_ATTRIBUTE_RANGE
+
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [attribute] is outside the range
+         * [TILE_ATTRIBUTE_RANGE]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
+        fun validateAttribute(attribute: Int, exceptCtor: (String) -> Exception = ::IllegalArgumentException) {
+            validate(attribute in TILE_ATTRIBUTE_RANGE, exceptCtor)
+            { "tile attribute must be in range $TILE_ATTRIBUTE_RANGE (attribute: $attribute)" }
+        }
+
+        /**
+         * Returns `true` if `this` set of attributes has dimensions [WIDTH] by [HEIGHT] and all of its attributes
+         * are in the range [TILE_ATTRIBUTE_RANGE], `false` ottherwise
+         */
+        fun Array<IntArray>.isValidAttributes() =
+                this.size == HEIGHT &&
+                this.all { it.size == WIDTH } &&
+                this.all { it.all { it in TILE_ATTRIBUTE_RANGE } }
+
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [attributes] does not have the dimensions
+         * [WIDTH] by [HEIGHT] or any of its attributes are outside the range [TILE_ATTRIBUTE_RANGE]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
+        fun validateAttributes(
+                attributes: Array<IntArray>,
+                exceptCtor: (String) -> Exception = ::IllegalArgumentException
+        ) {
+            validate(attributes.size == HEIGHT, exceptCtor)
+            { "height of attributes != $HEIGHT (height: ${attributes.size})" }
+
+            validate(attributes.all { it.size == WIDTH }, exceptCtor)
+            { "attributes must be square and have width $WIDTH" }
+
+            validate(attributes.all { it.all { it in TILE_ATTRIBUTE_RANGE } }, exceptCtor)
+            { "tile attributes must be in range $TILE_ATTRIBUTE_RANGE" }
+        }
     }
 }
-
-/**
- * Typealias for an [Int] representing an index in the list of tile attributes
- */
-internal typealias TileAttribute = Int
-
-/**
- * Alias for [PxAttr.WIDTH]
- *
- * Provided to allow accessing the width via a [PxAttr] instance rather than the class
- */
-internal inline val PxAttr.width get() = PxAttr.WIDTH
-
-/**
- * Alias for [PxAttr.HEIGHT]
- *
- * Provided to allow accessing the height via a [PxAttr] instance rather than the class
- */
-internal inline val PxAttr.height get() = PxAttr.HEIGHT
-
-/**
- * The product of `this` [PxAttr's][PxAttr] [width] and [height]
- */
-internal inline val PxAttr.size get() = width * height

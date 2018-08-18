@@ -35,16 +35,17 @@ internal fun PxAttr.Companion.fromChannel(chan: SeekableByteChannel): PxAttr {
         val width = it.getShort().toUInt()
         val height = it.getShort().toUInt()
 
-        validate(width == PxAttr.WIDTH && height == PxAttr.HEIGHT)
-        { "dimensions of PxAttr != $WIDTH x $HEIGHT (width: $width, height: $height)" }
+        PxAttr.validateWidth(width, ::ParseException)
+        PxAttr.validateHeight(height, ::ParseException)
     }
 
     chan.position(chan.position() + 1) // TODO: Verify that this byte is always 0
 
     return ByteBuffer.allocate(PxAttr.WIDTH * PxAttr.HEIGHT).let {
         chan.read(it)
-        val attributes = it.array().map(Byte::toUInt)
-        validate(attributes.all { it in ATTRIBUTE_RANGE }) { "all attributes must be in range $ATTRIBUTE_RANGE" }
+
+        val attributes = it.array().asIterable().chunked(WIDTH).map { it.map(Byte::toUInt).toIntArray() }.toTypedArray()
+        PxAttr.validateAttributes(attributes, ::ParseException)
 
         PxAttr(attributes)
     }

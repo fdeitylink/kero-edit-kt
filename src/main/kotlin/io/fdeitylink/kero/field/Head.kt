@@ -41,7 +41,7 @@ import io.fdeitylink.kero.validateName
  * Represents the head of a PxPack field
  *
  * @constructor
- * Constructs a new [Head] object
+ * Constructs a new [Head] object, using each argument to initialize the corresponding properties
  *
  * @param description Defaults to `""`
  * @param fields All values are defaulted to `""`
@@ -52,9 +52,9 @@ import io.fdeitylink.kero.validateName
  * [MIDDLEGROUND][TileLayer.Type.MIDDLEGROUND] `--> LayerMetadata(tileset = "")`,
  * [BACKGROUND][TileLayer.Type.BACKGROUND] `--> LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)`
  *
- * @throws [IllegalArgumentException] if [fields] has a size other than [NUMBER_OF_REFERENCED_FIELDS],
- * [layerMetadata] does not have a key-value pair for every member of [TileLayer.Type], or if an argument
- * has an invalid value as per its corresponding property's documentation
+ * @throws [IllegalArgumentException] if [fields] is invalid as per [isValidFields],
+ * [layerMetadata] is invalid as per [isValidLayerMetadata],
+ * or if an argument has an invalid value as per its corresponding property's documentation
  */
 internal class Head(
         description: String = "",
@@ -73,8 +73,7 @@ internal class Head(
      *
      * Non-essential and not used by the game
      *
-     * @throws [IllegalArgumentException] if set to a value whose length in bytes when using the SJIS charset
-     * is greater than [MAXIMUM_DESCRIPTION_BYTE_LENGTH]
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidDescription]
      */
     var description: String = description
         set(value) {
@@ -98,7 +97,7 @@ internal class Head(
     /**
      * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
      *
-     * @throws [IllegalArgumentException] if set to an invalid name (as per [validateName])
+     * @throws [IllegalArgumentException] if an attempt is made to set to an invalid value as per [validateName]
      */
     var spritesheet: String = spritesheet
         set(value) {
@@ -111,7 +110,7 @@ internal class Head(
     /**
      * A set of five bytes whose purpose is unknown
      *
-     * @throws [IllegalArgumentException] if set to a [ByteArray] whose size is not equal to [NUMBER_OF_UNKNOWN_BYTES]
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [validateUnknownBytes]
      */
     var unknownBytes: ByteArray = unknownBytes
         set(value) {
@@ -134,14 +133,6 @@ internal class Head(
      */
     @Suppress("CanBePrimaryConstructorProperty")
     val layerMetadata: Map<TileLayer.Type, LayerMetadata> = layerMetadata
-
-    init {
-        validateDescription(description)
-        validateFields(fields)
-        validateName(spritesheet, "spritesheet")
-        validateUnknownBytes(unknownBytes)
-        validateLayerMetadata(layerMetadata)
-    }
 
     override fun equals(other: Any?) =
             (this === other) ||
@@ -187,14 +178,37 @@ internal class Head(
          */
         const val NUMBER_OF_UNKNOWN_BYTES = 5
 
+        /**
+         * Returns `true` if the length of `this` description as a byte array in the SJIS charset exceeds
+         * [MAXIMUM_DESCRIPTION_BYTE_LENGTH], `false` otherwise
+         */
         fun String.isValidDescription() = this.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH
 
-        fun validateDescription(description: String, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if the length of [description] as a byte array
+         * in the SJIS chasrset exceeds [MAXIMUM_DESCRIPTION_BYTE_LENGTH]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
+        fun validateDescription(
+                description: String,
+                exceptCtor: (String) -> Exception = ::IllegalArgumentException
+        ) =
                 validate(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH, exceptCtor)
                 { "description bytes length must be <= $MAXIMUM_DESCRIPTION_BYTE_LENGTH (description: $description)" }
 
+        /**
+         * Returns `true` if the size of `this` set of fields equals [NUMBER_OF_REFERENCED_FIELDS] and all of its
+         * values are valid as per [isValidName], `false` otherwise
+         */
         fun Array<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS && this.all(String::isValidName)
 
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if the size of [fields] does not equal
+         * [NUMBER_OF_REFERENCED_FIELDS] or any of its values are invalid as per [isValidName]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
         fun validateFields(fields: Array<String>, exceptCtor: (String) -> Exception = ::IllegalArgumentException) {
             validate(fields.size == NUMBER_OF_REFERENCED_FIELDS, exceptCtor)
             { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${fields.size})" }
@@ -202,8 +216,18 @@ internal class Head(
             fields.forEach { validateName(it, "field", exceptCtor) }
         }
 
-        fun ByteArray.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
+        /**
+         * Returns `true` if the size of `this` byte array equals [NUMBER_OF_UNKNOWN_BYTES], `false` otherwise
+         */
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun ByteArray.isValidUnknownBytes() = this.size == NUMBER_OF_UNKNOWN_BYTES
 
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if the size of [unknownBytes] does not equal
+         * [NUMBER_OF_UNKNOWN_BYTES]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
         fun validateUnknownBytes(
                 unknownBytes: ByteArray,
                 exceptCtor: (String) -> Exception = ::IllegalArgumentException
@@ -211,10 +235,22 @@ internal class Head(
                 validate(unknownBytes.size == NUMBER_OF_UNKNOWN_BYTES, exceptCtor)
                 { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${unknownBytes.size})" }
 
+        /**
+         * Returns `true` if `this` set of [LayerMetadata] objects contains one instance for every tile layer in a
+         * PxPack field and if the [tileset][LayerMetadata.tileset] for the [foreground][TileLayer.Type.FOREGROUND]
+         * is not empty, `false` otherwise
+         */
         fun Map<TileLayer.Type, LayerMetadata>.isValidLayerMetadata() =
                 this.size == TileLayer.NUMBER_OF_TILE_LAYERS &&
                 this[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty()
 
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [layerMetadata] does not contain an object
+         * for every tile layer in a PxPack field or the [tileset][LayerMetadata.tileset] for the
+         * [foreground][TileLayer.Type.FOREGROUND] is empty
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
         fun validateLayerMetadata(
                 layerMetadata: Map<TileLayer.Type, LayerMetadata>,
                 exceptCtor: (String) -> Exception = ::IllegalArgumentException
@@ -261,7 +297,7 @@ internal data class BackgroundColor(
  * Represents the metadata for a [tile layer][TileLayer] in a PxPack field
  *
  * @constructor
- * Constructs a new [LayerMetadata] object
+ * Constructs a new [LayerMetadata] object, using each argument to initalize the corresponding properties
  *
  * @param tileset Defaults to `"mpt00"`
  * @param visibilityType Defaults to `2`
@@ -352,7 +388,8 @@ internal class LayerMetadata(
          */
         val VISIBILITY_TYPE_RANGE = 0..0xFF //0..32
 
-        fun Byte.isValidVisibilityType() = this in VISIBILITY_TYPE_RANGE
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun Byte.isValidVisibilityType() = this in VISIBILITY_TYPE_RANGE
 
         fun validateVisibilityType(type: Byte, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
                 validate(type in VISIBILITY_TYPE_RANGE, exceptCtor)

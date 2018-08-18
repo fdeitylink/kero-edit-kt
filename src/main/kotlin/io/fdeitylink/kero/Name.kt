@@ -24,15 +24,18 @@ import io.fdeitylink.util.validate
 const val MAXIMUM_NAME_BYTE_LENGTH = 15
 
 /**
- * Returns `true` if a filename contains no spaces and
- * its length as a byte array does not exceed [MAXIMUM_NAME_BYTE_LENGTH], `false` otherwise
+ * Returns `true` if `this` name contains no spaces and
+ * its length as a byte array in the SJIS charset does not exceed [MAXIMUM_NAME_BYTE_LENGTH], `false` otherwise
  */
 internal fun String.isValidName() = this.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH && ' ' !in this
 
 /**
- * Constructs and throws an exception (using [exceptCtor]) if `this` name is invalid (as per [isValidName])
+ * Constructs and throws an exception (using [exceptCtor]) if [name] contains spaces or
+ * its length as a byte array in the SJIS charset exceeds [MAXIMUM_NAME_BYTE_LENGTH]
  *
  * @param type What this name is used for (used for exception message)
+ *
+ * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
  */
 internal fun validateName(
         name: String,
@@ -41,5 +44,6 @@ internal fun validateName(
 ) {
     validate(name.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH, exceptCtor)
     { "$type name length must be <= $MAXIMUM_NAME_BYTE_LENGTH (name: $name)" }
+
     validate(' ' !in name, exceptCtor) { "$type name may not contain spaces (name: $name)" }
 }

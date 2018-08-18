@@ -30,7 +30,7 @@ import io.fdeitylink.kero.validateName
  * Represents an individual unit in a PxPack field
  *
  * @constructor
- * Constructs a new [PxUnit] object
+ * Constructs a new [PxUnit] object, using each argument to initialize the corresponding properties
  *
  * @throws [IllegalArgumentException] if an argument has an invalid value as per its corresponding property's documentation
  */
@@ -54,6 +54,8 @@ internal class PxUnit(
      * Represents the specific type of this unit
      *
      * Serves as a zero-based index into the unittype.txt file, which provides the actual type
+     *
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidType]
      */
     @Suppress("CanBePrimaryConstructorProperty")
     var type: Int = type
@@ -73,7 +75,7 @@ internal class PxUnit(
     /**
      * The x-coordinate of this unit in a PxPack field
      *
-     * @throws [IllegalArgumentException] if set to value outside [COORDINATE_RANGE]
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidCoordinate]
      */
     var x: Int = x
         set(value) {
@@ -86,7 +88,7 @@ internal class PxUnit(
     /**
      * The y-coordinate of this unit in a PxPack field
      *
-     * @throws [IllegalArgumentException] if set to a value outside [COORDINATE_RANGE]
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidCoordinate]
      */
     var y: Int = y
         set(value) {
@@ -105,7 +107,8 @@ internal class PxUnit(
     /**
      * The name of this unit, for use in scripts
      *
-     * @throws [IllegalArgumentException] if set to an invalid name (as per [validateName])
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per
+     * [isValidName][io.fdeitylink.kero.isValidName]
      */
     var name: String = name
         set(value) {
@@ -164,13 +167,31 @@ internal class PxUnit(
          */
         val COORDINATE_RANGE = TileLayer.DIMENSION_RANGE.first until TileLayer.DIMENSION_RANGE.endInclusive
 
-        fun Int.isValidType() = this in UNIT_TYPE_RANGE
+        /**
+         * Returns `true` if `this` type is in the range [UNIT_TYPE_RANGE], `false` otherwise
+         */
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun Int.isValidType() = this in UNIT_TYPE_RANGE
 
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [type] is outside the range [UNIT_TYPE_RANGE]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
         fun validateType(type: Int, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
                 validate(type in UNIT_TYPE_RANGE, exceptCtor) { "type must be in range $UNIT_TYPE_RANGE (type: $type)" }
 
-        fun Int.isValidCoordinate() = this in COORDINATE_RANGE
+        /**
+         * Returns `true` if `this` coordinate is in the range [COORDINATE_RANGE], `false` otherwise
+         */
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun Int.isValidCoordinate() = this in COORDINATE_RANGE
 
+        /**
+         * Constructs and throws an exception (using [exceptCtor] if [coordinate] is outside the range [COORDINATE_RANGE]
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
         fun validateCoordinate(coordinate: Int, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
                 validate(coordinate in COORDINATE_RANGE, exceptCtor)
                 { "coordinate must be in range $COORDINATE_RANGE (coordinate: $coordinate)" }

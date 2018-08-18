@@ -113,7 +113,7 @@ private fun TileLayer.Companion.fromChannel(chan: SeekableByteChannel): TileLaye
 
         ByteBuffer.allocate(width * height).let {
             chan.read(it)
-            TileLayer(width, height, it.array().map(Byte::toUInt))
+            TileLayer(it.array().asIterable().chunked(width).map { it.map(Byte::toUInt).toIntArray() }.toTypedArray())
         }
     }
 }

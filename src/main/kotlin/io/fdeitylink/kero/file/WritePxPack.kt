@@ -23,7 +23,6 @@ import io.fdeitylink.kero.field.Head
 import io.fdeitylink.kero.field.LayerMetadata
 import io.fdeitylink.kero.field.toByte
 import io.fdeitylink.kero.field.TileLayer
-import io.fdeitylink.kero.field.TileIndex
 import io.fdeitylink.kero.field.isEmpty
 import io.fdeitylink.kero.field.PxUnit
 
@@ -79,7 +78,7 @@ private fun TileLayer.toBytes() =
             width.toShort().toBytes() +
             height.toShort().toBytes() +
             0 + // TODO: Verify that this byte is always 0
-            tiles.map(TileIndex::toByte)
+            this.map(Int::toByte)
         }
 
 /**

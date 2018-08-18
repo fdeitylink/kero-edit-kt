@@ -57,7 +57,7 @@ internal class PxAttr(
     /**
      * Replaces the tile attribute in this [PxAttr] at the given coordinates with the given [attribute]
      *
-     * @throws [IllegalArgumentException] if [attribute] is outside the range [TILE_ATTRIBUTE_RANGE]
+     * @throws [IllegalArgumentException] if [attribute] is invalid as per [isValidAttribute]
      */
     operator fun set(x: Int, y: Int, attribute: Int) {
         validateAttribute(attribute)

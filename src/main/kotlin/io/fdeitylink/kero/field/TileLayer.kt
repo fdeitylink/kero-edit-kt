@@ -46,7 +46,7 @@ internal class TileLayer(tiles: Array<IntArray>) : Iterable<Int>, Observable {
     /**
      * The width of this tile layer
      *
-     * @throws [IllegalArgumentException] if set to a value outside [DIMENSION_RANGE]
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidDimension]
      */
     var width
         get() = if (tiles.isEmpty()) 0 else tiles.first().size
@@ -55,7 +55,7 @@ internal class TileLayer(tiles: Array<IntArray>) : Iterable<Int>, Observable {
     /**
      * The height of this tile layer
      *
-     * @throws [IllegalArgumentException] if set to a value outside [DIMENSION_RANGE]
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidDimension]
      */
     var height
         get() = if (width == 0) 0 else tiles.size
@@ -201,6 +201,21 @@ internal class TileLayer(tiles: Array<IntArray>) : Iterable<Int>, Observable {
          * Equivalent to the range of an unsigned short (`0..0xFFFF`)
          */
         val DIMENSION_RANGE = 0..0xFFFF
+
+        /**
+         * Returns `true` if `this` dimension is in the range [DIMENSION_RANGE], `false` otherwise
+         */
+        @Suppress("NOTHING_TO_INLINE")
+        inline fun Int.isValidDimension() = this in DIMENSION_RANGE
+
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [dimension] is outside the range [DIMENSION_RANGE]
+         *
+         * @param exceptCtor Defaults  to the [IllegalArgumentException] constructor
+         */
+        fun validateDimension(dimension: Int, exceptCtor: (String) -> Exception) =
+                validate(dimension in DIMENSION_RANGE, exceptCtor)
+                { "dimension must be in range $DIMENSION_RANGE (dimension: $dimension" }
 
         /**
          * Returns true if `this` set of tiles is square, has both dimensions in the range [DIMENSION_RANGE],

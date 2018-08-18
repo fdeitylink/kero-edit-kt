@@ -127,14 +127,14 @@ internal class Head(
     /**
      * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
      *
-     * @throws [IllegalArgumentException] if an attempt is made to set to an invalid value as per [validateName]
+     * @throws [IllegalArgumentException] if an attempt is made to set to an invalid value as per [isValidName]
      */
     var spritesheet: String by spritesheetProperty
 
     /**
      * A set of five bytes whose purpose is unknown
      *
-     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [validateUnknownBytes]
+     * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidUnknownBytes]
      */
     var unknownBytes: ByteArray = unknownBytes
         set(value) {

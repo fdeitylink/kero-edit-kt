@@ -16,47 +16,56 @@
 
 package io.fdeitylink.util
 
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleObjectProperty
+
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
 
 import javafx.beans.property.StringProperty
 import javafx.beans.property.SimpleStringProperty
 
-import kotlin.reflect.KMutableProperty1
-
-/*
- * All of these methods are copy/pasted from tornadofx's Properties.kt file, but the declarations and/or implementations
- * are slightly different
+/**
+ * Returns an [ObjectProperty] that will invoke [validator] whenever an attempt is made to set the value of the
+ * returned property
+ *
+ * @param initialValue The initial value for the returned property
+ * @param validator Should throw an exception if the given argument is invalid
  */
+fun <T> validatedProperty(initialValue: T, validator: (newValue: T) -> Unit): ObjectProperty<T> =
+        object : SimpleObjectProperty<T>(initialValue) {
+            override fun set(newValue: T) {
+                validator(newValue)
+                super.set(newValue)
+            }
+        }
 
 /**
- * Convert an owner instance and a corresponding [Int] property reference into an observable
+ * Returns an [IntegerProperty] that will invoke [validator] whenever an attempt is made to set the value of the
+ * returned property
+ *
+ * @param initialValue The initial value for the returned property
+ * @param validator Should throw an exception if the given argument is invalid
  */
-fun <S> S.observable(prop: KMutableProperty1<S, Int>) = observable(this, prop)
+fun validatedProperty(initialValue: Int, validator: (newValue: Int) -> Unit): IntegerProperty =
+        object : SimpleIntegerProperty(initialValue) {
+            override fun set(newValue: Int) {
+                validator(newValue)
+                super.set(newValue)
+            }
+        }
 
 /**
- * Convert an owner instance and a corresponding [Int] property reference into an observable
+ * Returns a [StringProperty] that will invoke [validator] whenever an attempt is made to set the value of the
+ * returned property
+ *
+ * @param initialValue The initial value for the returned property
+ * @param validator Should throw an exception if the given argument is invalid
  */
-@JvmName("observableFromMutableProperty")
-fun <S> observable(owner: S, prop: KMutableProperty1<S, Int>): IntegerProperty {
-    return object : SimpleIntegerProperty(owner, prop.name) {
-        override fun get() = prop.get(owner)
-        override fun set(v: Int) = prop.set(owner, v)
-    }
-}
-
-/**
- * Convert an owner instance and a corresponding [String] property reference into an observable
- */
-fun <S> S.observable(prop: KMutableProperty1<S, String>) = observable(this, prop)
-
-/**
- * Convert an owner instance and a corresponding [String] property reference into an observable
- */
-@JvmName("observableFromMutableProperty")
-fun <S> observable(owner: S, prop: KMutableProperty1<S, String>): StringProperty {
-    return object : SimpleStringProperty(owner, prop.name) {
-        override fun get() = prop.get(owner)
-        override fun set(v: String) = prop.set(owner, v)
-    }
-}
+fun validatedProperty(initialValue: String, validator: (newValue: String) -> Unit): StringProperty =
+        object : SimpleStringProperty(initialValue) {
+            override fun set(newValue: String) {
+                validator(newValue)
+                super.set(newValue)
+            }
+        }

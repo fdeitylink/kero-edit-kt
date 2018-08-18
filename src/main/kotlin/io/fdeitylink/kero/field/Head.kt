@@ -21,8 +21,14 @@ import java.util.Arrays
 
 import javafx.collections.ObservableList
 
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleObjectProperty
+
 import javafx.beans.property.ReadOnlyListProperty
 import javafx.beans.property.ReadOnlyListWrapper
+
+import tornadofx.getValue
+import tornadofx.setValue
 
 import tornadofx.observable
 
@@ -30,7 +36,7 @@ import io.fdeitylink.util.enumMapOf
 
 import io.fdeitylink.util.validate
 
-import io.fdeitylink.util.observable
+import io.fdeitylink.util.validatedProperty
 
 import io.fdeitylink.kero.CHARSET
 
@@ -68,6 +74,16 @@ internal class Head(
                 TileLayer.Type.BACKGROUND to LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
         )
 ) {
+    init {
+        validateDescription(description)
+        validateFields(fields)
+        validateName(spritesheet, "spritesheet")
+        validateUnknownBytes(unknownBytes)
+        validateLayerMetadata(layerMetadata)
+    }
+
+    val descriptionProperty = validatedProperty(description) { validateDescription(it) }
+
     /**
      * A string used by the developer as a description of this PxPack field
      *
@@ -75,14 +91,9 @@ internal class Head(
      *
      * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidDescription]
      */
-    var description: String = description
-        set(value) {
-            validateDescription(value)
-            field = value
-        }
+    var description: String by descriptionProperty
 
-    val descriptionProperty = observable(Head::description)
-
+    // TODO: Prevent setting names to invalid values
     /**
      * A set of four fields referenced by this PxPack field
      *
@@ -92,20 +103,16 @@ internal class Head(
      */
     val fields: ObservableList<String> = Arrays.asList(*fields).observable()
 
-    val fieldsProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(this, "fields", this.fields)
+    val fieldsProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(this.fields)
+
+    val spritesheetProperty = validatedProperty(spritesheet) { validateName(it, "spritesheet") }
 
     /**
      * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
      *
      * @throws [IllegalArgumentException] if an attempt is made to set to an invalid value as per [validateName]
      */
-    var spritesheet: String = spritesheet
-        set(value) {
-            validateName(value, "spritesheet")
-            field = value
-        }
-
-    val spritesheetProperty = observable(Head::spritesheet)
+    var spritesheet: String by spritesheetProperty
 
     /**
      * A set of five bytes whose purpose is unknown
@@ -118,15 +125,15 @@ internal class Head(
             field = value
         }
 
+    val bgColorProperty: ObjectProperty<BackgroundColor> = SimpleObjectProperty(bgColor)
+
     // TODO: Consider changing type to JavaFX Color
     /**
      * The background color of this PxPack field
      */
-    @Suppress("CanBePrimaryConstructorProperty")
-    var bgColor: BackgroundColor = bgColor
+    var bgColor: BackgroundColor by bgColorProperty
 
-    val bgColorProperty = observable(Head::bgColor)
-
+    // TODO: Consider exposing ReadOnlyMapProperty
     // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
     /**
      * A set of three tile layer metadata sets, where each corresponds to tile layer in this PxPack field
@@ -310,18 +317,19 @@ internal class LayerMetadata(
         visibilityType: Byte = 2,
         scrollType: ScrollType = ScrollType.NORMAL
 ) {
+    init {
+        validateName(tileset, "tileset")
+        //validateVisibilityType(visibilityType)
+    }
+
+    val tilesetProperty = validatedProperty(tileset) { validateName(it, "tileset") }
+
     /**
      * The name of the tileset used to display a tile layer in a PxPack field
      *
      * @throws [IllegalArgumentException] if set to an invalid name (as per [validateName])
      */
-    var tileset: String = tileset
-        set(value) {
-            validateName(value)
-            field = value
-        }
-
-    val tilesetProperty = observable(LayerMetadata::tileset)
+    var tileset: String by tilesetProperty
 
     /**
      * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack field
@@ -348,18 +356,12 @@ internal class LayerMetadata(
         field = value
     }*/
 
+    val scrollTypeProperty: ObjectProperty<ScrollType> = SimpleObjectProperty(scrollType)
+
     /**
      * The type of scrolling used to display a tile layer in a PxPack field
      */
-    @Suppress("CanBePrimaryConstructorProperty")
-    var scrollType: ScrollType = scrollType
-
-    val scrollTypeProperty = observable(LayerMetadata::scrollType)
-
-    init {
-        validateName(tileset)
-        //validateVisibilityType(visibilityType)
-    }
+    var scrollType: ScrollType by scrollTypeProperty
 
     override fun equals(other: Any?) =
             (this === other) ||

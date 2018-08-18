@@ -18,11 +18,12 @@ package io.fdeitylink.kero.field
 
 import java.util.Objects
 
-import tornadofx.observable as objectObservable
+import tornadofx.getValue
+import tornadofx.setValue
 
 import io.fdeitylink.util.validate
 
-import io.fdeitylink.util.observable
+import io.fdeitylink.util.validatedProperty
 
 import io.fdeitylink.kero.validateName
 
@@ -43,11 +44,20 @@ internal class PxUnit(
         unknownBytes: Pair<Byte, Byte>,
         name: String
 ) {
+    init {
+        validateType(type)
+        validateCoordinate(x)
+        validateCoordinate(y)
+        validateName(name, "unit")
+    }
+
     /**
      * Potentially represents a set of flags for this unit
      */
     @Suppress("CanBePrimaryConstructorProperty")
     var flags: Byte = flags
+
+    val typeProperty = validatedProperty(type) { validateType(it) }
 
     // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
     /**
@@ -57,14 +67,7 @@ internal class PxUnit(
      *
      * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidType]
      */
-    @Suppress("CanBePrimaryConstructorProperty")
-    var type: Int = type
-    /*set(value) {
-        type.validateType()
-        field = value
-    }*/
-
-    val typeProperty = objectObservable(PxUnit::type)
+    var type: Int by typeProperty
 
     /**
      * A byte whose purpose is unknown
@@ -72,31 +75,23 @@ internal class PxUnit(
     @Suppress("CanBePrimaryConstructorProperty")
     var unknownByte: Byte = unknownByte
 
+    val xProperty = validatedProperty(x) { validateCoordinate(it) }
+
     /**
      * The x-coordinate of this unit in a PxPack field
      *
      * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidCoordinate]
      */
-    var x: Int = x
-        set(value) {
-            validateCoordinate(value)
-            field = value
-        }
+    var x: Int by xProperty
 
-    val xProperty = observable(PxUnit::x)
+    val yProperty = validatedProperty(y) { validateCoordinate(it) }
 
     /**
      * The y-coordinate of this unit in a PxPack field
      *
      * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidCoordinate]
      */
-    var y: Int = y
-        set(value) {
-            validateCoordinate(value)
-            field = value
-        }
-
-    val yProperty = observable(PxUnit::y)
+    var y: Int by yProperty
 
     /**
      * A set of two bytes whose purpose is unknown
@@ -104,26 +99,15 @@ internal class PxUnit(
     @Suppress("CanBePrimaryConstructorProperty")
     var unknownBytes: Pair<Byte, Byte> = unknownBytes
 
+    val nameProperty = validatedProperty(name) { validateName(it, "unit") }
+
     /**
      * The name of this unit, for use in scripts
      *
      * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per
      * [isValidName][io.fdeitylink.kero.isValidName]
      */
-    var name: String = name
-        set(value) {
-            validateName(value, "unit")
-            field = value
-        }
-
-    val nameProperty = observable(PxUnit::name)
-
-    init {
-        validateType(type)
-        validateCoordinate(x)
-        validateCoordinate(y)
-        validateName(name, "unit")
-    }
+    var name: String by nameProperty
 
     override fun equals(other: Any?) =
             (this === other) ||

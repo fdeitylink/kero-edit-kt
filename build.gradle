@@ -20,7 +20,7 @@ repositories {
 dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 
-    implementation 'no.tornado:tornadofx:1.7.16'
+    implementation 'no.tornado:tornadofx:1.7.17'
 
     testImplementation 'junit:junit:4.12'
 }

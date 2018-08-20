@@ -18,9 +18,6 @@ package io.fdeitylink.kero.field
 
 import javafx.collections.ObservableList
 
-import javafx.beans.property.ReadOnlyListProperty
-import javafx.beans.property.ReadOnlyListWrapper
-
 import tornadofx.observableList
 import tornadofx.observable
 
@@ -48,7 +45,9 @@ internal data class PxPack(
          * Represents the [tile layers][TileLayer] of this PxPack field
          */
         val layers: Map<TileLayer.Type, TileLayer> =
-                TileLayer.Type.values().associateTo(enumMapOf<TileLayer.Type, TileLayer>()) { it to TileLayer() },
+                TileLayer.Type.values()
+                        .associateTo(enumMapOf<TileLayer.Type, TileLayer>()) { it to TileLayer() }
+                        .observable(),
 
         /**
          * Represents the [units][PxUnit] of this PxPack field
@@ -60,12 +59,11 @@ internal data class PxPack(
         validateUnits(units)
     }
 
-    val unitsProperty: ReadOnlyListProperty<PxUnit> = ReadOnlyListWrapper(this.units)
-
     constructor(
             head: Head = Head(),
             layers: Map<TileLayer.Type, TileLayer> =
-                    TileLayer.Type.values().associateTo(enumMapOf<TileLayer.Type, TileLayer>()) { it to TileLayer() },
+                    TileLayer.Type.values()
+                            .associateTo(enumMapOf<TileLayer.Type, TileLayer>()) { it to TileLayer() },
             units: List<PxUnit> = listOf()
     ) : this(head, layers, units.toMutableList().observable())
 

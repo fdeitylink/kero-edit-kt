@@ -24,9 +24,6 @@ import javafx.collections.ObservableList
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 
-import javafx.beans.property.ReadOnlyListProperty
-import javafx.beans.property.ReadOnlyListWrapper
-
 import tornadofx.getValue
 import tornadofx.setValue
 
@@ -120,8 +117,6 @@ internal class Head(
         }
     }
 
-    val fieldsProperty: ReadOnlyListProperty<String> = ReadOnlyListWrapper(this.fields)
-
     val spritesheetProperty = validatedProperty(spritesheet) { validateName(it, "spritesheet") }
 
     /**
@@ -150,7 +145,6 @@ internal class Head(
      */
     var bgColor: BackgroundColor by bgColorProperty
 
-    // TODO: Consider exposing ReadOnlyMapProperty
     // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
     /**
      * A set of three tile layer metadata sets, where each corresponds to tile layer in this PxPack field

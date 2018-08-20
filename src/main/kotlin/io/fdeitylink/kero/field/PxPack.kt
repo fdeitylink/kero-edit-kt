@@ -16,12 +16,13 @@
 
 package io.fdeitylink.kero.field
 
+import java.util.Objects
+
 import javafx.collections.ObservableList
 
-import tornadofx.observableList
-import tornadofx.observable
+import kotlinx.collections.immutable.toImmutableMap
 
-import io.fdeitylink.util.enumMapOf
+import tornadofx.observable
 
 import io.fdeitylink.util.validate
 
@@ -29,43 +30,55 @@ import io.fdeitylink.util.validate
  * Represents a PxPack field
  *
  * @constructor
- * Constructs a new [PxPack] object
+ * Constructs a new [PxPack] object, using each argument to initialize the corresponding properties
  *
  * @throws [IllegalArgumentException] if [layers] is invalid as per [isValidLayers],
  * or [units] is invalid as per [isValidUnits]
  */
-internal data class PxPack(
-        /**
-         * Represents the [head][Head] of this PxPack field
-         */
-        val head: Head = Head(),
-
-        // TODO: Consider changing to SortedMap since order matters in the file and this would make iteration consistent
-        /**
-         * Represents the [tile layers][TileLayer] of this PxPack field
-         */
-        val layers: Map<TileLayer.Type, TileLayer> =
-                TileLayer.Type.values()
-                        .associateTo(enumMapOf<TileLayer.Type, TileLayer>()) { it to TileLayer() }
-                        .observable(),
-
-        /**
-         * Represents the [units][PxUnit] of this PxPack field
-         */
-        val units: ObservableList<PxUnit> = observableList()
+internal class PxPack(
+        head: Head = Head(),
+        layers: Map<TileLayer.Type, TileLayer> = TileLayer.Type.values().associate { it to TileLayer() },
+        units: List<PxUnit> = listOf()
 ) {
     init {
         validateLayers(layers)
         validateUnits(units)
     }
 
-    constructor(
-            head: Head = Head(),
-            layers: Map<TileLayer.Type, TileLayer> =
-                    TileLayer.Type.values()
-                            .associateTo(enumMapOf<TileLayer.Type, TileLayer>()) { it to TileLayer() },
-            units: List<PxUnit> = listOf()
-    ) : this(head, layers, units.toMutableList().observable())
+    /**
+     * Represents the [head][Head] of this PxPack field
+     */
+    @Suppress("CanBePrimaryConstructorProperty")
+    val head: Head = head
+
+    // TODO: Consider changing to SortedMap since order matters in the file and this would make iteration consistent
+    /**
+     * Represents the [tile layers][TileLayer] of this PxPack field
+     *
+     * @throws [UnsupportedOperationException] if an attempt is made to change the contents of this map
+     */
+    val layers: Map<TileLayer.Type, TileLayer> = layers.toImmutableMap()
+
+    /**
+     * Represents the [units][PxUnit] of this PxPack field
+     */
+    val units: ObservableList<PxUnit> = units.toMutableList().observable()
+
+    override fun equals(other: Any?) =
+            (this === other) ||
+            (other is PxPack &&
+             head == other.head &&
+             layers == other.layers &&
+             units == other.units)
+
+    override fun hashCode() = Objects.hash(head, layers, units)
+
+    override fun toString() =
+            "PxPack(" +
+            "head=$head," +
+            "layers=$layers," +
+            "units=$units" +
+            ")"
 
     companion object {
         /**

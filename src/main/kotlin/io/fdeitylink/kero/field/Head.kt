@@ -24,6 +24,8 @@ import javafx.collections.ObservableList
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 
+import kotlinx.collections.immutable.toImmutableMap
+
 import tornadofx.getValue
 import tornadofx.setValue
 
@@ -98,7 +100,7 @@ internal class Head(
      * Field names can be empty (i.e. `""`)
      *
      * @throws [IllegalArgumentException] if an attempt is made to set an element to an invalid value as per [isValidName]
-     * @throws [UnsupportedOperationException] if an attempt to change the size of this list is made
+     * @throws [UnsupportedOperationException] if an attempt is made to change the size of this list
      */
     val fields = object : ObservableList<String> by fieldsBacking {
         override fun set(index: Int, element: String): String {
@@ -148,9 +150,10 @@ internal class Head(
     // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
     /**
      * A set of three tile layer metadata sets, where each corresponds to tile layer in this PxPack field
+     *
+     * @throws [UnsupportedOperationException] if an attempt is made to change the contents of this map
      */
-    @Suppress("CanBePrimaryConstructorProperty")
-    val layerMetadata: Map<TileLayer.Type, LayerMetadata> = layerMetadata
+    val layerMetadata: Map<TileLayer.Type, LayerMetadata> = layerMetadata.toImmutableMap()
 
     override fun equals(other: Any?) =
             (this === other) ||

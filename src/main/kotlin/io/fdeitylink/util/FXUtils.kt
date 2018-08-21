@@ -32,7 +32,7 @@ import javafx.beans.property.SimpleStringProperty
  * @param initialValue The initial value for the returned property
  * @param validator Should throw an exception if the given argument is invalid
  */
-fun <T> validatedProperty(initialValue: T, validator: (newValue: T) -> Unit): ObjectProperty<T> =
+inline fun <T> validatedProperty(initialValue: T, crossinline validator: (T) -> Unit): ObjectProperty<T> =
         object : SimpleObjectProperty<T>(initialValue) {
             override fun set(newValue: T) {
                 validator(newValue)
@@ -47,7 +47,7 @@ fun <T> validatedProperty(initialValue: T, validator: (newValue: T) -> Unit): Ob
  * @param initialValue The initial value for the returned property
  * @param validator Should throw an exception if the given argument is invalid
  */
-fun validatedProperty(initialValue: Int, validator: (newValue: Int) -> Unit): IntegerProperty =
+inline fun validatedProperty(initialValue: Int, crossinline validator: (Int) -> Unit): IntegerProperty =
         object : SimpleIntegerProperty(initialValue) {
             override fun set(newValue: Int) {
                 validator(newValue)
@@ -62,7 +62,7 @@ fun validatedProperty(initialValue: Int, validator: (newValue: Int) -> Unit): In
  * @param initialValue The initial value for the returned property
  * @param validator Should throw an exception if the given argument is invalid
  */
-fun validatedProperty(initialValue: String, validator: (newValue: String) -> Unit): StringProperty =
+inline fun validatedProperty(initialValue: String, crossinline validator: (String) -> Unit): StringProperty =
         object : SimpleStringProperty(initialValue) {
             override fun set(newValue: String) {
                 validator(newValue)

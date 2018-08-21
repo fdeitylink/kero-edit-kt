@@ -21,9 +21,15 @@ import java.util.Objects
 import javafx.beans.Observable
 import javafx.beans.InvalidationListener
 
+import javafx.beans.property.IntegerProperty
+import javafx.beans.property.SimpleIntegerProperty
+
+import tornadofx.getValue
+import tornadofx.setValue
+
 import io.fdeitylink.util.validate
 
-// TODO: Consider implementing your own change listeners that give more information
+// TODO: Consider implementing custom change listeners that give more information
 // TODO: Consider changing tiles to Array<ByteArray>
 // TODO: Consider implementing Collection instead of Iterable
 /**
@@ -41,25 +47,39 @@ internal class TileLayer(tiles: Array<IntArray>) : Iterable<Int>, Observable {
         validateTiles(tiles)
     }
 
-    // TODO: Consider IntegerProperties for width, height (would need to delegate to Properties, so no custom get/set)
+    private val _widthProperty = object : SimpleIntegerProperty() {
+        override fun get() = if (tiles.isEmpty()) 0 else tiles.first().size
+
+        override fun set(newValue: Int) = resize(newValue, height)
+
+        public override fun fireValueChangedEvent() = super.fireValueChangedEvent()
+    }
+
+    inline val widthProperty: IntegerProperty get() = _widthProperty
 
     /**
      * The width of this tile layer
      *
      * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidDimension]
      */
-    var width
-        get() = if (tiles.isEmpty()) 0 else tiles.first().size
-        set(value) = resize(value, height)
+    var width: Int by _widthProperty
+
+    private val _heightProperty = object : SimpleIntegerProperty() {
+        override fun get() = if (width == 0) 0 else tiles.size
+
+        override fun set(newValue: Int) = resize(width, newValue)
+
+        public override fun fireValueChangedEvent() = super.fireValueChangedEvent()
+    }
+
+    inline val heightProperty: IntegerProperty get() = _heightProperty
 
     /**
      * The height of this tile layer
      *
      * @throws [IllegalArgumentException] if an attempt is made to set it to an invalid value as per [isValidDimension]
      */
-    var height
-        get() = if (width == 0) 0 else tiles.size
-        set(value) = resize(width, value)
+    var height: Int by _heightProperty
 
     // If I did assignment without copying, modifying tiles without the set function would be possible
     private var tiles = tiles.map(IntArray::clone).toTypedArray()
@@ -71,6 +91,9 @@ internal class TileLayer(tiles: Array<IntArray>) : Iterable<Int>, Observable {
      */
     constructor() : this(arrayOf())
 
+    /**
+     * Constructs a new [TileLayer] with the given [width] and [height] and all tiles initialized to `0`
+     */
     constructor(width: Int, height: Int) : this(Array(height) { IntArray(width) })
 
     /**
@@ -80,6 +103,9 @@ internal class TileLayer(tiles: Array<IntArray>) : Iterable<Int>, Observable {
 
     /**
      * Replaces the tile in this [TileLayer] at the given coordinates with the given [tile]
+     *
+     * If [tile] is different from the tile that was already present at the given coordinates, the
+     * [InvalidationListeners][InvalidationListener] added to this object will be invoked
      *
      * @throws [IllegalArgumentException] if [tile] is outside the range [TILE_INDEX_RANGE]
      */
@@ -95,16 +121,23 @@ internal class TileLayer(tiles: Array<IntArray>) : Iterable<Int>, Observable {
     }
 
     /**
-     * Resizes the tiles of this [TileLayer]
+     * Sets the size of this [TileLayer] to the given dimensions
      *
-     * @throws [IllegalArgumentException] if [newWidth] or [newHeight] are outside [DIMENSION_RANGE]
+     * If either of the given dimensions are different from the current ones, the
+     * [InvalidationListeners][InvalidationListener] added to this object will be invoked, as will any listeners
+     * on [widthProperty] and/or [heightProperty], depending on if the width, height, or both were changed.
+     *
+     * @throws [IllegalArgumentException] if [width] or [height] are outside [DIMENSION_RANGE]
      */
-    fun resize(newWidth: Int, newHeight: Int) {
-        require(newWidth in DIMENSION_RANGE && newHeight in DIMENSION_RANGE)
-        { "dimensions must be in range $DIMENSION_RANGE (newWidth: $newWidth, newHeight: $newHeight)" }
+    fun resize(width: Int, height: Int) {
+        require(width in DIMENSION_RANGE && height in DIMENSION_RANGE)
+        { "dimensions must be in range $DIMENSION_RANGE (width: $width, height: $height)" }
 
-        val oldWidth = width
-        val oldHeight = height
+        val oldWidth = this.width
+        val oldHeight = this.height
+
+        val newWidth = if (height == 0) 0 else width
+        val newHeight = if (newWidth == 0) 0 else height
 
         if (oldWidth != newWidth || oldHeight != newHeight) {
             tiles = if (oldWidth * oldHeight == 0 || newWidth * newHeight == 0) {
@@ -119,6 +152,13 @@ internal class TileLayer(tiles: Array<IntArray>) : Iterable<Int>, Observable {
             }
 
             listeners.forEach { it.invalidated(this) }
+
+            if (oldWidth != newWidth) {
+                _widthProperty.fireValueChangedEvent()
+            }
+            if (oldHeight != newHeight) {
+                _heightProperty.fireValueChangedEvent()
+            }
         }
     }
 

@@ -18,11 +18,12 @@ package io.fdeitylink.kero.field
 
 import java.util.Objects
 
+import java.util.Collections
+import java.util.SortedMap
 
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 
-import kotlinx.collections.immutable.toImmutableMap
 import javafx.beans.property.StringProperty
 
 import kotlinx.collections.immutable.ImmutableList
@@ -31,7 +32,7 @@ import kotlinx.collections.immutable.toImmutableList
 import tornadofx.getValue
 import tornadofx.setValue
 
-import tornadofx.observable
+import tornadofx.toProperty
 
 import io.fdeitylink.util.enumMapOf
 
@@ -56,12 +57,17 @@ import io.fdeitylink.kero.validateName
  * @param spritesheet Defaults to `""`
  * @param unknownBytes All values are defaulted to `0`
  * @param bgColor Defaults to `BackgroundColor(0, 0, 0)` (black)
- * @param layerMetadata Defaults to: [FOREGROUND][TileLayer.Type.FOREGROUND] `--> LayerMetaData()`,
- * [MIDDLEGROUND][TileLayer.Type.MIDDLEGROUND] `--> LayerMetadata(tileset = "")`,
- * [BACKGROUND][TileLayer.Type.BACKGROUND] `--> LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)`
+ * @param tilesets Defaults to: [FOREGROUND][TileLayer.Type.FOREGROUND] `--> "mpt00"`,
+ * [MIDDLEGROUND][TileLayer.Type.MIDDLEGROUND] `--> ""`,
+ * [BACKGROUND][TileLayer.Type.BACKGROUND] `--> ""`
+ * @param visibilityTypes All values are defaulted to `2`
+ * @param scrollTypes Defaults to: [FOREGROUND][TileLayer.Type.FOREGROUND] `-->` [NORMAL][ScrollType.NORMAL],
+ * [MIDDLEGROUND][TileLayer.Type.MIDDLEGROUND] `-->` [NORMAL][ScrollType.NORMAL],
+ * [BACKGROUND][TileLayer.Type.BACKGROUND] `-->` [THREE_FOURTHS][ScrollType.THREE_FOURTHS]
  *
  * @throws [IllegalArgumentException] if [fields] is invalid as per [isValidFields],
- * [layerMetadata] is invalid as per [isValidLayerMetadata],
+ * [tilesets] is invalid as per [isValidTilesets], [visibilityTypes] is invalid as per [isValidVisibilityTypes],
+ * [scrollTypes] is invalid as per [isValidScrollTypes],
  * or if an argument has an invalid value as per its corresponding property's documentation
  */
 internal class Head(
@@ -70,10 +76,16 @@ internal class Head(
         spritesheet: String = "",
         unknownBytes: ByteArray = ByteArray(NUMBER_OF_UNKNOWN_BYTES) { 0 },
         bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
-        layerMetadata: Map<TileLayer.Type, LayerMetadata> = enumMapOf(
-                TileLayer.Type.FOREGROUND to LayerMetadata(),
-                TileLayer.Type.MIDDLEGROUND to LayerMetadata(tileset = ""),
-                TileLayer.Type.BACKGROUND to LayerMetadata(tileset = "", scrollType = ScrollType.THREE_FOURTHS)
+        tilesets: Map<TileLayer.Type, String> = enumMapOf(
+                TileLayer.Type.FOREGROUND to "mpt00",
+                TileLayer.Type.MIDDLEGROUND to "",
+                TileLayer.Type.BACKGROUND to ""
+        ),
+        visibilityTypes: Map<TileLayer.Type, Byte> = TileLayer.Type.values().associate { it to 2.toByte() },
+        scrollTypes: Map<TileLayer.Type, ScrollType> = enumMapOf(
+                TileLayer.Type.FOREGROUND to ScrollType.NORMAL,
+                TileLayer.Type.MIDDLEGROUND to ScrollType.NORMAL,
+                TileLayer.Type.BACKGROUND to ScrollType.THREE_FOURTHS
         )
 ) {
     init {
@@ -81,7 +93,9 @@ internal class Head(
         validateFields(fields)
         validateName(spritesheet, "spritesheet")
         validateUnknownBytes(unknownBytes)
-        validateLayerMetadata(layerMetadata)
+        validateTilesets(tilesets)
+        validateVisibilityTypes(visibilityTypes)
+        validateScrollTypes(scrollTypes)
     }
 
     val descriptionProperty = validatedProperty(description) { validateDescription(it) }
@@ -134,13 +148,54 @@ internal class Head(
      */
     var bgColor: BackgroundColor by bgColorProperty
 
-    // TODO: Consider replacing with 3 ObservableMaps, one for each component of LayerMetadata
     /**
-     * A set of three tile layer metadata sets, where each corresponds to tile layer in this PxPack field
+     * A set of names for tilesets used to render each tile layer in a PxPack file
+     *
+     * The order of this map is derived from the natural ordering of [TileLayer.Type]
+     *
+     * @throws [IllegalArgumentException] if an attempt is made to set a value to an invalid value as per [isValidName]
+     * @throws [UnsupportedOperationException] if an attempt is made to change the contents of this map
+     */
+    val tilesets: SortedMap<TileLayer.Type, StringProperty> =
+            Collections.unmodifiableSortedMap(
+                    tilesets.mapValues { (_, name) -> validatedProperty(name) { validateName(name) } }.toSortedMap()
+            )
+
+    /**
+     * A set of bytes, where each potentially represents some kind of visibility setting used to display a tile layer
+     * in a PxPack field
+     *
+     * The order of this map is derived from the natural ordering of [TileLayer.Type]
+     *
+     * Still not sure whether or not the byte in the file actually represents any kind of visibility toggle
+     * or setting, but when modifying the byte in a file the visibility of a particular layer would be changed.
+     *
+     * When set to:
+     *
+     * * `0`, the layer becomes invisible
+     *
+     * * `2`, the layer is visible (the byte usually holds this value)
+     *
+     * * `1` or `3..32`, the wrong tiles are pulled but from the correct tileset (maybe an offset is applied?)
+     *
+     * * `33..`, the game crashes
+     *
+     * This class will probably eventually be replaced with an enum class
      *
      * @throws [UnsupportedOperationException] if an attempt is made to change the contents of this map
      */
-    val layerMetadata: Map<TileLayer.Type, LayerMetadata> = layerMetadata.toImmutableMap()
+    val visibilityTypes: SortedMap<TileLayer.Type, Byte> =
+            Collections.unmodifiableSortedMap(visibilityTypes.toSortedMap())
+
+    /**
+     * A set of [ScrollTypes][ScrollType] for each tile layer in a PxPack file
+     *
+     * The order of this map is derived from the natural ordering of [TileLayer.Type]
+     *
+     * @throws [UnsupportedOperationException] if an attempt is made to change the contents of this map
+     */
+    val scrollTypes: SortedMap<TileLayer.Type, ObjectProperty<ScrollType>> =
+            Collections.unmodifiableSortedMap(scrollTypes.mapValues { (_, type) -> type.toProperty() }.toSortedMap())
 
     override fun equals(other: Any?) =
             (this === other) ||
@@ -150,9 +205,12 @@ internal class Head(
              spritesheet == other.spritesheet &&
              unknownBytes.contentEquals(other.unknownBytes) &&
              bgColor == other.bgColor &&
-             layerMetadata == other.layerMetadata)
+             tilesets == other.tilesets &&
+             visibilityTypes == other.visibilityTypes &&
+             scrollTypes == other.scrollTypes)
 
-    override fun hashCode() = Objects.hash(description, fields, spritesheet, unknownBytes, bgColor, layerMetadata)
+    override fun hashCode() =
+            Objects.hash(description, fields, spritesheet, unknownBytes, bgColor, tilesets, visibilityTypes, scrollTypes)
 
     override fun toString() =
             "Head(" +
@@ -161,7 +219,9 @@ internal class Head(
             "spritesheet='$spritesheet'," +
             "unknownBytes=${unknownBytes.contentToString()}," +
             "bgColor=$bgColor," +
-            "layerMetadata=$layerMetadata" +
+            "tilesets=$tilesets," +
+            "visibilityTypes=$visibilityTypes," +
+            "scrollTypes=$scrollTypes" +
             ")"
 
     companion object {
@@ -241,30 +301,67 @@ internal class Head(
         ) = validateSize(unknownBytes, "unknownBytes", NUMBER_OF_UNKNOWN_BYTES, exceptCtor)
 
         /**
-         * Returns `true` if `this` set of [LayerMetadata] objects contains one instance for every tile layer in a
-         * PxPack field and if the [tileset][LayerMetadata.tileset] for the [foreground][TileLayer.Type.FOREGROUND]
-         * is not empty, `false` otherwise
+         * Returns `true` if `this` set of tileset names contains once instance for every tile layer in a PxPack field,
+         * the tileset for the [foreground][TileLayer.Type.FOREGROUND] is not empty,
+         * and all tileset names are valid as per [isValidName], `false` otherwise
          */
-        fun Map<TileLayer.Type, LayerMetadata>.isValidLayerMetadata() =
+        fun Map<TileLayer.Type, String>.isValidTilesets() =
                 this.size == TileLayer.NUMBER_OF_TILE_LAYERS &&
-                this[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty()
+                this[TileLayer.Type.FOREGROUND]!!.isNotEmpty() &&
+                this.values.all(String::isValidName)
 
         /**
-         * Constructs and throws an exception (using [exceptCtor]) if [layerMetadata] does not contain an object
-         * for every tile layer in a PxPack field or the [tileset][LayerMetadata.tileset] for the
-         * [foreground][TileLayer.Type.FOREGROUND] is empty
+         * Constructs and throws an exception (using [exceptCtor]) if [tilesets] does not contain an entry for every
+         * tile layer in a PxPack field, the tileset for the [foreground][TileLayer.Type.FOREGROUND] is empty,
+         * or any of the tileset names are invalid as per [isValidName]
          *
          * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
          */
-        fun validateLayerMetadata(
-                layerMetadata: Map<TileLayer.Type, LayerMetadata>,
+        fun validateTilesets(
+                tilesets: Map<TileLayer.Type, String>,
                 exceptCtor: (String) -> Exception = ::IllegalArgumentException
         ) {
-            validateSize(layerMetadata, "layerMetadata", TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
+            validateSize(tilesets, "tilesets", TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
 
-            validate(layerMetadata[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty(), exceptCtor)
+            validate(tilesets[TileLayer.Type.FOREGROUND]!!.isNotEmpty(), exceptCtor)
             { "foreground tileset name may not be empty" }
+
+            tilesets.values.forEach { validateName(it, "tileset", exceptCtor) }
         }
+
+        /**
+         * Returns `true` if `this` set of visibility types contains once instance for every tile layer
+         * in a PxPack field, `false` otherwise
+         */
+        fun Map<TileLayer.Type, Byte>.isValidVisibilityTypes() = this.size == TileLayer.NUMBER_OF_TILE_LAYERS
+
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [visibilityTypes] does not contain an entry
+         * for every tile layer in a PxPack field
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
+        fun validateVisibilityTypes(
+                visibilityTypes: Map<TileLayer.Type, Byte>,
+                exceptCtor: (String) -> Exception = ::IllegalArgumentException
+        ) = validateSize(visibilityTypes, "visibilityTypes", TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
+
+        /**
+         * Returns `true` if `this` set of [scroll types][ScrollType] contains one instance for everytile layer in a
+         * PxPack field, `false` otherwise
+         */
+        fun Map<TileLayer.Type, ScrollType>.isValidScrollTypes() = this.size == TileLayer.NUMBER_OF_TILE_LAYERS
+
+        /**
+         * Constructs and throws an exception (using [exceptCtor]) if [scrollTypes] does not contain an entry
+         * for every tile layer in a PxPack field
+         *
+         * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+         */
+        fun validateScrollTypes(
+                scrollTypes: Map<TileLayer.Type, ScrollType>,
+                exceptCtor: (String) -> Exception = ::IllegalArgumentException
+        ) = validateSize(scrollTypes, "scrollTypes", TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
     }
 }
 
@@ -296,105 +393,6 @@ internal data class BackgroundColor(
          */
         val blue: Byte
 )
-
-/**
- * Represents the metadata for a [tile layer][TileLayer] in a PxPack field
- *
- * @constructor
- * Constructs a new [LayerMetadata] object, using each argument to initalize the corresponding properties
- *
- * @param tileset Defaults to `"mpt00"`
- * @param visibilityType Defaults to `2`
- * @param scrollType Defaults to [ScrollType.NORMAL]
- *
- * @throws [IllegalArgumentException] if an argument has an invalid value as per its corresponding property's documentation
- */
-internal class LayerMetadata(
-        tileset: String = "mpt00",
-        visibilityType: Byte = 2,
-        scrollType: ScrollType = ScrollType.NORMAL
-) {
-    init {
-        validateName(tileset, "tileset")
-        //validateVisibilityType(visibilityType)
-    }
-
-    val tilesetProperty = validatedProperty(tileset) { validateName(it, "tileset") }
-
-    /**
-     * The name of the tileset used to display a tile layer in a PxPack field
-     *
-     * @throws [IllegalArgumentException] if set to an invalid name (as per [validateName])
-     */
-    var tileset: String by tilesetProperty
-
-    /**
-     * Potentially represents some kind of visibility setting used to display a tile layer in a PxPack field
-     *
-     * Still not sure whether or not the byte in the file actually represents any kind of visibility toggle
-     * or setting, but when modifying the byte in a file the visibility of a particular layer would be changed.
-     *
-     * When set to:
-     *
-     * * `0`, the layer becomes invisible
-     *
-     * * `2`, the layer is visible (the byte usually holds this value)
-     *
-     * * `1` or `3..32`, the wrong tiles are pulled but from the correct tileset (maybe an offset is applied?)
-     *
-     * * `33..`, the game crashes
-     *
-     * This class will probably eventually be replaced with an enum class
-     */
-    @Suppress("CanBePrimaryConstructorProperty")
-    var visibilityType: Byte = visibilityType
-    /*set(value) {
-        validateVisibilityType(value)
-        field = value
-    }*/
-
-    val scrollTypeProperty: ObjectProperty<ScrollType> = SimpleObjectProperty(scrollType)
-
-    /**
-     * The type of scrolling used to display a tile layer in a PxPack field
-     */
-    var scrollType: ScrollType by scrollTypeProperty
-
-    override fun equals(other: Any?) =
-            (this === other) ||
-            (other is LayerMetadata &&
-             tileset == other.tileset &&
-             visibilityType == other.visibilityType &&
-             scrollType == other.scrollType)
-
-    override fun hashCode() = Objects.hash(tileset, visibilityType, scrollType)
-
-    override fun toString() =
-            "LayerMetadata(" +
-            "tileset='$tileset'," +
-            "visibilityType=$visibilityType," +
-            "scrollType=$scrollType" +
-            ")"
-
-    companion object {
-        /*
-         * Since I'm not really sure what this byte is for, it doesn't seem right to validate it quite yet
-         * This program doesn't give any means to modify it anyway, so it can't be made invalid unless already
-         * invalid in the source file
-         */
-        /**
-         * The supposed valid range for [visibilityType] to occupy
-         */
-        val VISIBILITY_TYPE_RANGE = 0..0xFF //0..32
-
-        @Suppress("NOTHING_TO_INLINE")
-        inline fun Byte.isValidVisibilityType() = this in VISIBILITY_TYPE_RANGE
-
-        fun validateVisibilityType(type: Byte, exceptCtor: (String) -> Exception = ::IllegalArgumentException) =
-                validate(type in VISIBILITY_TYPE_RANGE, exceptCtor)
-                { "visibility type must be in range $VISIBILITY_TYPE_RANGE (type: $type)" }
-    }
-}
 
 /**
  * Represents the scrolling type of a tile layer in a PxPack field

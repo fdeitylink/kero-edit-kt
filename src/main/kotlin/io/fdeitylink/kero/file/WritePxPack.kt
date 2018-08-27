@@ -20,7 +20,6 @@ import io.fdeitylink.kero.KERO_CHARSET
 
 import io.fdeitylink.kero.field.PxPack
 import io.fdeitylink.kero.field.Head
-import io.fdeitylink.kero.field.LayerMetadata
 import io.fdeitylink.kero.field.toByte
 import io.fdeitylink.kero.field.TileLayer
 import io.fdeitylink.kero.field.isEmpty
@@ -44,7 +43,17 @@ internal fun PxPack.toBytes() =
  * This does not comprise a fully valid PxPack file, just part of it.
  */
 private fun Head.toBytes(): ByteArray {
-    fun LayerMetadata.toBytes() = tileset.toBytes() + visibilityType + scrollType.toByte()
+    val tilesetBytes = tilesets.values.map { it.value.toKeroBytes() }
+
+    val visibilityTypeBytes = visibilityTypes.values
+
+    val scrollTypeBytes = scrollTypes.values.map { it.value.toByte() }
+
+    val metadata =
+            tilesetBytes
+                    .zip(visibilityTypeBytes)
+                    .zip(scrollTypeBytes) { (t, v), s -> t + v + s }
+                    .reduce(ByteArray::plus)
 
     return Head.HEADER_STRING.toByteArray() +
 
@@ -60,7 +69,7 @@ private fun Head.toBytes(): ByteArray {
            bgColor.green +
            bgColor.blue +
 
-           layerMetadata.toSortedMap().values.map(LayerMetadata::toBytes).reduce(ByteArray::plus)
+           metadata
 }
 
 /**

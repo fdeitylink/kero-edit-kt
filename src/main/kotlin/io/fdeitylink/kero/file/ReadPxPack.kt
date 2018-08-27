@@ -30,7 +30,6 @@ import io.fdeitylink.util.toEnumMap
 import io.fdeitylink.kero.field.PxPack
 import io.fdeitylink.kero.field.Head
 import io.fdeitylink.kero.field.BackgroundColor
-import io.fdeitylink.kero.field.LayerMetadata
 import io.fdeitylink.kero.field.ScrollType
 import io.fdeitylink.kero.field.TileLayer
 import io.fdeitylink.kero.field.PxUnit
@@ -72,28 +71,28 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
         BackgroundColor(it.get(), it.get(), it.get())
     }
 
-    val layerMetadata =
-            TileLayer.Type.values().associate {
-                val tileset = nameFromChannel(chan, "tileset")
+    val tilesets = mutableMapOf<TileLayer.Type, String>()
+    val visibilityTypes = mutableMapOf<TileLayer.Type, Byte>()
+    val scrollTypes = mutableMapOf<TileLayer.Type, ScrollType>()
 
-                val (visibilityType, scrollType) = ByteBuffer.allocate(2).let {
-                    chan.read(it)
-                    it.flip()
+    TileLayer.Type.values().forEach { layer ->
+        tilesets += layer to nameFromChannel(chan, "tileset")
 
-                    val vis = it.get()
-                    //LayerMetadata.validateVisibilityType(vis, ::ParseException)
+        ByteBuffer.allocate(2).let {
+            chan.read(it)
+            it.flip()
 
-                    val scrollIndex = it.get().toUInt()
-                    validate(scrollIndex < ScrollType.NUMBER_OF_SCROLL_TYPES)
-                    { "scroll type must be in range ${ScrollType.values().indices} (type: $scrollIndex)" }
+            visibilityTypes += layer to it.get()
 
-                    Pair(vis, ScrollType.values()[scrollIndex])
-                }
+            val scrollIndex = it.get().toUInt()
+            validate(scrollIndex < ScrollType.NUMBER_OF_SCROLL_TYPES)
+            { "scroll type must be in range ${ScrollType.values().indices} (type: $scrollIndex)" }
 
-                it to LayerMetadata(tileset, visibilityType, scrollType)
-            }.toEnumMap()
+            scrollTypes += layer to ScrollType.values()[scrollIndex]
+        }
+    }
 
-    return Head(description, fields, spritesheet, unknownBytes, bgColor, layerMetadata)
+    return Head(description, fields, spritesheet, unknownBytes, bgColor, tilesets, visibilityTypes, scrollTypes )
 }
 
 private fun TileLayer.Companion.fromChannel(chan: SeekableByteChannel): TileLayer {

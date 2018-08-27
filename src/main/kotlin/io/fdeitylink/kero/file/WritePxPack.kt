@@ -16,7 +16,7 @@
 
 package io.fdeitylink.kero.file
 
-import io.fdeitylink.kero.CHARSET
+import io.fdeitylink.kero.KERO_CHARSET
 
 import io.fdeitylink.kero.field.PxPack
 import io.fdeitylink.kero.field.Head
@@ -48,12 +48,12 @@ private fun Head.toBytes(): ByteArray {
 
     return Head.HEADER_STRING.toByteArray() +
 
-           description.toBytes() +
+           description.toKeroBytes() +
 
            // TODO: Take only first 4
            fields.map(String::toBytes).reduce(ByteArray::plus) +
 
-           spritesheet.toBytes() +
+           spritesheet.toKeroBytes() +
 
            unknownBytes +
 
@@ -96,9 +96,9 @@ private fun PxUnit.toBytes() =
         y.toShort().toBytes() +
         unknownBytes.first +
         unknownBytes.second +
-        name.toBytes()
+        name.toKeroBytes()
 
 /**
  * Converts a [String] into an SJIS-encoded [ByteArray], with its length in bytes placed at the head of the array
  */
-private fun String.toBytes() = toByteArray(CHARSET).let { byteArrayOf(it.size.toByte(), *it)}
+private fun String.toKeroBytes() = toByteArray(KERO_CHARSET).let { byteArrayOf(it.size.toByte(), *it) }

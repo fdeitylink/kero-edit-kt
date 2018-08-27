@@ -154,6 +154,6 @@ private fun String.Companion.fromChannel(chan: ReadableByteChannel): String {
 
     return ByteBuffer.allocate(len).let {
         chan.read(it)
-        String.fromBytes(it.array())
+        String.fromKeroBytes(it.array())
     }
 }

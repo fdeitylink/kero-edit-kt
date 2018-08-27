@@ -21,12 +21,12 @@ import java.nio.ByteBuffer
 
 import io.fdeitylink.util.validate as genericValidate
 
-import io.fdeitylink.kero.CHARSET
+import io.fdeitylink.kero.KERO_CHARSET
 
 internal fun validateHeader(chan: ReadableByteChannel, header: String, type: String) {
     ByteBuffer.allocate(header.toByteArray().size).let {
         chan.read(it)
-        val readHeader = String.fromBytes(it.array())
+        val readHeader = String.fromKeroBytes(it.array())
         validate(readHeader == header) { "$type header does not match $header (header: $readHeader)" }
     }
 }
@@ -34,4 +34,4 @@ internal fun validateHeader(chan: ReadableByteChannel, header: String, type: Str
 internal inline fun validate(value: Boolean, lazyMessage: () -> Any) =
         genericValidate(value, ::ParseException, lazyMessage)
 
-internal fun String.Companion.fromBytes(bytes: ByteArray) = String(bytes, CHARSET)
+internal fun String.Companion.fromKeroBytes(bytes: ByteArray) = String(bytes, KERO_CHARSET)

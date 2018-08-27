@@ -27,7 +27,7 @@ const val MAXIMUM_NAME_BYTE_LENGTH = 15
  * Returns `true` if `this` name contains no spaces and
  * its length as a byte array in the SJIS charset does not exceed [MAXIMUM_NAME_BYTE_LENGTH], `false` otherwise
  */
-internal fun String.isValidName() = this.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH && ' ' !in this
+internal fun String.isValidName() = this.toByteArray(KERO_CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH && ' ' !in this
 
 /**
  * Constructs and throws an exception (using [exceptCtor]) if [name] contains spaces or
@@ -42,7 +42,7 @@ internal fun validateName(
         type: String = "",
         exceptCtor: (String) -> Exception = ::IllegalArgumentException
 ) {
-    validate(name.toByteArray(CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH, exceptCtor)
+    validate(name.toByteArray(KERO_CHARSET).size <= MAXIMUM_NAME_BYTE_LENGTH, exceptCtor)
     { "$type name length must be <= $MAXIMUM_NAME_BYTE_LENGTH (name: $name)" }
 
     validate(' ' !in name, exceptCtor) { "$type name may not contain spaces (name: $name)" }

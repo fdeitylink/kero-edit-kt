@@ -37,7 +37,7 @@ import io.fdeitylink.util.validate
 
 import io.fdeitylink.util.validatedProperty
 
-import io.fdeitylink.kero.CHARSET
+import io.fdeitylink.kero.KERO_CHARSET
 
 import io.fdeitylink.kero.isValidName
 import io.fdeitylink.kero.validateName
@@ -203,7 +203,7 @@ internal class Head(
          * Returns `true` if the length of `this` description as a byte array in the SJIS charset exceeds
          * [MAXIMUM_DESCRIPTION_BYTE_LENGTH], `false` otherwise
          */
-        fun String.isValidDescription() = this.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH
+        fun String.isValidDescription() = this.toByteArray(KERO_CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH
 
         /**
          * Constructs and throws an exception (using [exceptCtor]) if the length of [description] as a byte array
@@ -215,7 +215,7 @@ internal class Head(
                 description: String,
                 exceptCtor: (String) -> Exception = ::IllegalArgumentException
         ) =
-                validate(description.toByteArray(CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH, exceptCtor)
+                validate(description.toByteArray(KERO_CHARSET).size <= MAXIMUM_DESCRIPTION_BYTE_LENGTH, exceptCtor)
                 { "description bytes length must be <= $MAXIMUM_DESCRIPTION_BYTE_LENGTH (description: $description)" }
 
         /**

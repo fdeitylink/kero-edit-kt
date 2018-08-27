@@ -16,4 +16,4 @@
 
 package io.fdeitylink.kero
 
-val CHARSET = charset("SJIS")
+val KERO_CHARSET = charset("SJIS")

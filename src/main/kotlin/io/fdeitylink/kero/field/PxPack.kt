@@ -25,6 +25,7 @@ import kotlinx.collections.immutable.toImmutableMap
 import tornadofx.observable
 
 import io.fdeitylink.util.validate
+import io.fdeitylink.util.validateSize
 
 /**
  * Represents a PxPack field
@@ -96,9 +97,7 @@ internal class PxPack(
         fun validateLayers(
                 layers: Map<TileLayer.Type, TileLayer>,
                 exceptCtor: (String) -> Exception = ::IllegalArgumentException
-        ) =
-                validate(layers.size == TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
-                { "layers.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layers.size})" }
+        ) = validateSize(layers, "layers", TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
 
         /**
          * Returns `true` if the [size][List.size] of `this` list of [PxUnit] objects does not exceed

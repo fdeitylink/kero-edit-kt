@@ -34,6 +34,7 @@ import tornadofx.observable
 import io.fdeitylink.util.enumMapOf
 
 import io.fdeitylink.util.validate
+import io.fdeitylink.util.validateSize
 
 import io.fdeitylink.util.validatedProperty
 
@@ -231,8 +232,7 @@ internal class Head(
          * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
          */
         fun validateFields(fields: Array<String>, exceptCtor: (String) -> Exception = ::IllegalArgumentException) {
-            validate(fields.size == NUMBER_OF_REFERENCED_FIELDS, exceptCtor)
-            { "fields.size != $NUMBER_OF_REFERENCED_FIELDS (size: ${fields.size})" }
+            validateSize(fields, "fields", NUMBER_OF_REFERENCED_FIELDS, exceptCtor)
 
             fields.forEach { validateName(it, "field", exceptCtor) }
         }
@@ -252,9 +252,7 @@ internal class Head(
         fun validateUnknownBytes(
                 unknownBytes: ByteArray,
                 exceptCtor: (String) -> Exception = ::IllegalArgumentException
-        ) =
-                validate(unknownBytes.size == NUMBER_OF_UNKNOWN_BYTES, exceptCtor)
-                { "unknownBytes.size != $NUMBER_OF_UNKNOWN_BYTES (size: ${unknownBytes.size})" }
+        ) = validateSize(unknownBytes, "unknownBytes", NUMBER_OF_UNKNOWN_BYTES, exceptCtor)
 
         /**
          * Returns `true` if `this` set of [LayerMetadata] objects contains one instance for every tile layer in a
@@ -276,8 +274,7 @@ internal class Head(
                 layerMetadata: Map<TileLayer.Type, LayerMetadata>,
                 exceptCtor: (String) -> Exception = ::IllegalArgumentException
         ) {
-            validate(layerMetadata.size == TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
-            { "layerMetadata.size != ${TileLayer.NUMBER_OF_TILE_LAYERS} (size: ${layerMetadata.size})" }
+            validateSize(layerMetadata, "layerMetadata", TileLayer.NUMBER_OF_TILE_LAYERS, exceptCtor)
 
             validate(layerMetadata[TileLayer.Type.FOREGROUND]!!.tileset.isNotEmpty(), exceptCtor)
             { "foreground tileset name may not be empty" }

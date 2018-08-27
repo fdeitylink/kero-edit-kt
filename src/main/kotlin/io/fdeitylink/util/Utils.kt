@@ -32,3 +32,57 @@ internal inline fun validate(
         throw exceptCtor(lazyMessage().toString())
     }
 }
+
+/**
+ * Constructs and throws an exception (using [exceptCtor]) if `collection.size` is not equal to [expectedSize]
+ *
+ * @param collectionName The name of the parameter that [collection] was an argument for
+ * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+ */
+internal inline fun validateSize(
+        collection: Collection<*>,
+        collectionName: String,
+        expectedSize: Int,
+        exceptCtor: (String) -> Exception = ::IllegalArgumentException
+) =
+        validate(collection.size == expectedSize, exceptCtor)
+        { "$collectionName.size != $expectedSize (size: ${collection.size})" }
+
+/**
+ * Constructs and throws an exception (using [exceptCtor]) if `map.size` is not equal to [expectedSize]
+ *
+ * @param mapName The name of the parameter that [map] was an argument for
+ * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+ */
+internal inline fun validateSize(
+        map: Map<*, *>,
+        mapName: String,
+        expectedSize: Int,
+        exceptCtor: (String) -> Exception = ::IllegalArgumentException
+) = validate(map.size == expectedSize, exceptCtor) { "$mapName.size != $expectedSize (size: ${map.size})" }
+
+/**
+ * Constructs and throws an exception (using [exceptCtor]) if `map.size` is not equal to [expectedSize]
+ *
+ * @param arrayName The name of the parameter that [array] was an argument for
+ * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+ */
+internal inline fun validateSize(
+        array: Array<*>,
+        arrayName: String,
+        expectedSize: Int,
+        exceptCtor: (String) -> Exception = ::IllegalArgumentException
+) = validate(array.size == expectedSize, exceptCtor) { "$arrayName.size != $expectedSize (size: ${array.size})" }
+
+/**
+ * Constructs and throws an exception (using [exceptCtor]) if `map.size` is not equal to [expectedSize]
+ *
+ * @param arrayName The name of the parameter that [array] was an argument for
+ * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
+ */
+internal inline fun validateSize(
+        array: ByteArray,
+        arrayName: String,
+        expectedSize: Int,
+        exceptCtor: (String) -> Exception = ::IllegalArgumentException
+) = validate(array.size == expectedSize, exceptCtor) { "$arrayName.size != $expectedSize (size: ${array.size})" }

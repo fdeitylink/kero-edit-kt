@@ -50,8 +50,7 @@ private fun Head.toBytes(): ByteArray {
 
            description.toKeroBytes() +
 
-           // TODO: Take only first 4
-           fields.map(String::toBytes).reduce(ByteArray::plus) +
+           fields.map { it.value.toKeroBytes() }.reduce(ByteArray::plus) +
 
            spritesheet.toKeroBytes() +
 

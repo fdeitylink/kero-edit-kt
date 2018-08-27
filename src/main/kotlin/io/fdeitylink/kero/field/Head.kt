@@ -17,14 +17,16 @@
 package io.fdeitylink.kero.field
 
 import java.util.Objects
-import java.util.Arrays
 
-import javafx.collections.ObservableList
 
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 
 import kotlinx.collections.immutable.toImmutableMap
+import javafx.beans.property.StringProperty
+
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 import tornadofx.getValue
 import tornadofx.setValue
@@ -64,7 +66,7 @@ import io.fdeitylink.kero.validateName
  */
 internal class Head(
         description: String = "",
-        fields: Array<String> = Array(NUMBER_OF_REFERENCED_FIELDS) { "" },
+        fields: List<String> = List(NUMBER_OF_REFERENCED_FIELDS) { "" },
         spritesheet: String = "",
         unknownBytes: ByteArray = ByteArray(NUMBER_OF_UNKNOWN_BYTES) { 0 },
         bgColor: BackgroundColor = BackgroundColor(0, 0, 0),
@@ -93,32 +95,16 @@ internal class Head(
      */
     var description: String by descriptionProperty
 
-    private val fieldsBacking = Arrays.asList(*fields).observable()
-
+    // TODO: Consider using Collections.unmodifiableList()
     /**
-     * A set of four fields referenced by this PxPack field
+     * A list of four fields referenced by this PxPack field
      *
      * Field names can be empty (i.e. `""`)
      *
      * @throws [IllegalArgumentException] if an attempt is made to set an element to an invalid value as per [isValidName]
-     * @throws [UnsupportedOperationException] if an attempt is made to change the size of this list
      */
-    val fields = object : ObservableList<String> by fieldsBacking {
-        override fun set(index: Int, element: String): String {
-            validateName(element, "field")
-            return fieldsBacking.set(index, element)
-        }
-
-        override fun setAll(col: MutableCollection<out String>): Boolean {
-            col.forEach { validateName(it, "field") }
-            return fieldsBacking.setAll(col)
-        }
-
-        override fun setAll(vararg elements: String): Boolean {
-            elements.forEach { validateName(it, "field") }
-            return fieldsBacking.setAll(*elements)
-        }
-    }
+    val fields: ImmutableList<StringProperty> =
+            fields.map { validatedProperty(it) { validateName(it) } }.toImmutableList()
 
     val spritesheetProperty = validatedProperty(spritesheet) { validateName(it, "spritesheet") }
 
@@ -223,7 +209,7 @@ internal class Head(
          * Returns `true` if the size of `this` set of fields equals [NUMBER_OF_REFERENCED_FIELDS] and all of its
          * values are valid as per [isValidName], `false` otherwise
          */
-        fun Array<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS && this.all(String::isValidName)
+        fun List<String>.isValidFields() = this.size == NUMBER_OF_REFERENCED_FIELDS && this.all(String::isValidName)
 
         /**
          * Constructs and throws an exception (using [exceptCtor]) if the size of [fields] does not equal
@@ -231,7 +217,7 @@ internal class Head(
          *
          * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
          */
-        fun validateFields(fields: Array<String>, exceptCtor: (String) -> Exception = ::IllegalArgumentException) {
+        fun validateFields(fields: List<String>, exceptCtor: (String) -> Exception = ::IllegalArgumentException) {
             validateSize(fields, "fields", NUMBER_OF_REFERENCED_FIELDS, exceptCtor)
 
             fields.forEach { validateName(it, "field", exceptCtor) }

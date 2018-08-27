@@ -57,7 +57,7 @@ private fun Head.Companion.fromChannel(chan: ReadableByteChannel): Head {
     val description = String.fromChannel(chan)
     Head.validateDescription(description, ::ParseException)
 
-    val fields = Array(NUMBER_OF_REFERENCED_FIELDS) { nameFromChannel(chan, "field") }
+    val fields = List(NUMBER_OF_REFERENCED_FIELDS) { nameFromChannel(chan, "field") }
 
     val spritesheet = nameFromChannel(chan, "spritesheet")
 

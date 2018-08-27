@@ -68,19 +68,6 @@ internal inline fun validateSize(
  * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
  */
 internal inline fun validateSize(
-        array: Array<*>,
-        arrayName: String,
-        expectedSize: Int,
-        exceptCtor: (String) -> Exception = ::IllegalArgumentException
-) = validate(array.size == expectedSize, exceptCtor) { "$arrayName.size != $expectedSize (size: ${array.size})" }
-
-/**
- * Constructs and throws an exception (using [exceptCtor]) if `map.size` is not equal to [expectedSize]
- *
- * @param arrayName The name of the parameter that [array] was an argument for
- * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
- */
-internal inline fun validateSize(
         array: ByteArray,
         arrayName: String,
         expectedSize: Int,

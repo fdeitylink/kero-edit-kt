@@ -33,7 +33,7 @@ import io.fdeitylink.kero.field.PxUnit
  */
 internal fun PxPack.toBytes() =
         head.toBytes() +
-        layers.toSortedMap().values.map(TileLayer::toBytes).reduce(ByteArray::plus) +
+        layers.values.map(TileLayer::toBytes).reduce(ByteArray::plus) +
         units.size.toShort().toBytes() +
         units.map(PxUnit::toBytes).reduce(ByteArray::plus)
 

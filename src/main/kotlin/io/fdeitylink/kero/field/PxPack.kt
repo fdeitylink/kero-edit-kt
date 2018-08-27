@@ -18,9 +18,10 @@ package io.fdeitylink.kero.field
 
 import java.util.Objects
 
-import javafx.collections.ObservableList
+import java.util.Collections
+import java.util.SortedMap
 
-import kotlinx.collections.immutable.toImmutableMap
+import javafx.collections.ObservableList
 
 import tornadofx.observable
 
@@ -52,13 +53,14 @@ internal class PxPack(
     @Suppress("CanBePrimaryConstructorProperty")
     val head: Head = head
 
-    // TODO: Consider changing to SortedMap since order matters in the file and this would make iteration consistent
     /**
      * Represents the [tile layers][TileLayer] of this PxPack field
      *
+     * The order of this map is derived from the natural ordering of [TileLayer.Type]
+     *
      * @throws [UnsupportedOperationException] if an attempt is made to change the contents of this map
      */
-    val layers: Map<TileLayer.Type, TileLayer> = layers.toImmutableMap()
+    val layers: SortedMap<TileLayer.Type, TileLayer> = Collections.unmodifiableSortedMap(layers.toSortedMap())
 
     /**
      * Represents the [units][PxUnit] of this PxPack field

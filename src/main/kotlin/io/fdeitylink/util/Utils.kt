@@ -17,18 +17,18 @@
 package io.fdeitylink.util
 
 /**
- * Constructs and throws an exception (using [ctor]) with the result of calling [lazyMessage] if [value] is `false`
+ * Constructs and throws an exception (using [exceptCtor]) with the result of calling [lazyMessage] if [value] is `false`
  *
  * Similar to [require] but the type of thrown exception can be chosen
  *
- * @param ctor Defaults to the [IllegalArgumentException] constructor
+ * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
  */
 internal inline fun validate(
         value: Boolean,
-        ctor: (String) -> Exception = ::IllegalArgumentException,
+        exceptCtor: (String) -> Exception = ::IllegalArgumentException,
         lazyMessage: () -> Any
 ) {
     if (!value) {
-        throw ctor(lazyMessage().toString())
+        throw exceptCtor(lazyMessage().toString())
     }
 }

@@ -39,7 +39,7 @@ import io.fdeitylink.util.enumMapOf
 import io.fdeitylink.util.validate
 import io.fdeitylink.util.validateSize
 
-import io.fdeitylink.util.validatedProperty
+import io.fdeitylink.util.validatedStringProperty
 
 import io.fdeitylink.kero.KERO_CHARSET
 
@@ -98,7 +98,7 @@ internal class Head(
         validateScrollTypes(scrollTypes)
     }
 
-    val descriptionProperty = validatedProperty(description) { validateDescription(it) }
+    val descriptionProperty = validatedStringProperty(description) { validateDescription(it) }
 
     /**
      * A string used by the developer as a description of this PxPack field
@@ -118,9 +118,9 @@ internal class Head(
      * @throws [IllegalArgumentException] if an attempt is made to set an element to an invalid value as per [isValidName]
      */
     val fields: ImmutableList<StringProperty> =
-            fields.map { validatedProperty(it) { validateName(it) } }.toImmutableList()
+            fields.map { validatedStringProperty(it) { validateName(it) } }.toImmutableList()
 
-    val spritesheetProperty = validatedProperty(spritesheet) { validateName(it, "spritesheet") }
+    val spritesheetProperty = validatedStringProperty(spritesheet) { validateName(it, "spritesheet") }
 
     /**
      * The spritesheet used for rendering the [units][PxUnit] of this PxPack field
@@ -158,7 +158,7 @@ internal class Head(
      */
     val tilesets: SortedMap<TileLayer.Type, StringProperty> =
             Collections.unmodifiableSortedMap(
-                    tilesets.mapValues { (_, name) -> validatedProperty(name) { validateName(name) } }.toSortedMap()
+                    tilesets.mapValues { (_, name) -> validatedStringProperty(name) { validateName(name) } }.toSortedMap()
             )
 
     /**

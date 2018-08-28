@@ -23,7 +23,8 @@ import tornadofx.setValue
 
 import io.fdeitylink.util.validate
 
-import io.fdeitylink.util.validatedProperty
+import io.fdeitylink.util.validatedIntegerProperty
+import io.fdeitylink.util.validatedStringProperty
 
 import io.fdeitylink.kero.validateName
 
@@ -57,7 +58,7 @@ internal class PxUnit(
     @Suppress("CanBePrimaryConstructorProperty")
     var flags: Byte = flags
 
-    val typeProperty = validatedProperty(type) { validateType(it) }
+    val typeProperty = validatedIntegerProperty(type) { validateType(it) }
 
     // TODO: Change this from Int to Type after determining how many unit types exist and finishing the Type enum class
     /**
@@ -75,7 +76,7 @@ internal class PxUnit(
     @Suppress("CanBePrimaryConstructorProperty")
     var unknownByte: Byte = unknownByte
 
-    val xProperty = validatedProperty(x) { validateCoordinate(it) }
+    val xProperty = validatedIntegerProperty(x) { validateCoordinate(it) }
 
     /**
      * The x-coordinate of this unit in a PxPack field
@@ -84,7 +85,7 @@ internal class PxUnit(
      */
     var x: Int by xProperty
 
-    val yProperty = validatedProperty(y) { validateCoordinate(it) }
+    val yProperty = validatedIntegerProperty(y) { validateCoordinate(it) }
 
     /**
      * The y-coordinate of this unit in a PxPack field
@@ -99,7 +100,7 @@ internal class PxUnit(
     @Suppress("CanBePrimaryConstructorProperty")
     var unknownBytes: Pair<Byte, Byte> = unknownBytes
 
-    val nameProperty = validatedProperty(name) { validateName(it, "unit") }
+    val nameProperty = validatedStringProperty(name) { validateName(it, "unit") }
 
     /**
      * The name of this unit, for use in scripts

@@ -47,7 +47,7 @@ inline fun <T> validatedProperty(initialValue: T, crossinline validator: (T) -> 
  * @param initialValue The initial value for the returned property
  * @param validator Should throw an exception if the given argument is invalid
  */
-inline fun validatedProperty(initialValue: Int, crossinline validator: (Int) -> Unit): IntegerProperty =
+inline fun validatedIntegerProperty(initialValue: Int, crossinline validator: (Int) -> Unit): IntegerProperty =
         object : SimpleIntegerProperty(initialValue) {
             override fun set(newValue: Int) {
                 validator(newValue)
@@ -62,7 +62,7 @@ inline fun validatedProperty(initialValue: Int, crossinline validator: (Int) -> 
  * @param initialValue The initial value for the returned property
  * @param validator Should throw an exception if the given argument is invalid
  */
-inline fun validatedProperty(initialValue: String, crossinline validator: (String) -> Unit): StringProperty =
+inline fun validatedStringProperty(initialValue: String, crossinline validator: (String) -> Unit): StringProperty =
         object : SimpleStringProperty(initialValue) {
             override fun set(newValue: String) {
                 validator(newValue)

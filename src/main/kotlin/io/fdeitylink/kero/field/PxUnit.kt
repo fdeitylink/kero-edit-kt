@@ -623,14 +623,3 @@ internal class PxUnit(
         }
     }
 }
-
-/**
- * The [x][PxUnit.x] and [y][PxUnit.y] coordinates of `this` [PxUnit] as a [Pair],
- * where `x` is the first component and `y` is the second
- */
-internal val PxUnit.coordinates get() = Pair(x, y)
-
-/**
- * Returns a [Byte] representing `this` [Type's][PxUnit.Type] index in the unittype.txt file
- */
-internal fun PxUnit.Type.toByte() = ordinal.toByte()

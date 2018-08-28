@@ -16,6 +16,8 @@
 
 package io.fdeitylink.util
 
+import javafx.collections.ObservableSet
+
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 
@@ -24,6 +26,30 @@ import javafx.beans.property.SimpleIntegerProperty
 
 import javafx.beans.property.StringProperty
 import javafx.beans.property.SimpleStringProperty
+
+import tornadofx.observable
+
+/**
+ * Returns a [sorted][java.util.SortedSet] [ObservableSet] that will invoke [validator] whenever an attempt is made to
+ * add a value to the returned set
+ *
+ * @param validator Should throw an exception if the given argument is invalid
+ */
+inline fun <T> validatedSortedObservableSet(crossinline validator: (T) -> Unit): ObservableSet<T> {
+    val backing = sortedSetOf<T>().observable()
+
+    return object : ObservableSet<T> by backing {
+        override fun add(element: T): Boolean {
+            validator(element)
+            return backing.add(element)
+        }
+
+        override fun addAll(elements: Collection<T>): Boolean {
+            elements.forEach(validator)
+            return backing.addAll(elements)
+        }
+    }
+}
 
 /**
  * Returns an [ObjectProperty] that will invoke [validator] whenever an attempt is made to set the value of the

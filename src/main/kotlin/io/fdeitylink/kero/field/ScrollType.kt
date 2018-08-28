@@ -47,9 +47,3 @@ internal enum class ScrollType {
         const val NUMBER_OF_SCROLL_TYPES = 10
     }
 }
-
-// TODO: Consider moving to WritePxPack.kt file
-/**
- * Returns a [Byte] representing `this` [ScrollType's][ScrollType] index in the scroll.txt file
- */
-internal fun ScrollType.toByte() = ordinal.toByte()

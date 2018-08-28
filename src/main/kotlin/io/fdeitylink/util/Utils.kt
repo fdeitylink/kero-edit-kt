@@ -23,7 +23,7 @@ package io.fdeitylink.util
  *
  * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
  */
-internal inline fun validate(
+inline fun validate(
         value: Boolean,
         exceptCtor: (String) -> Exception = ::IllegalArgumentException,
         lazyMessage: () -> Any
@@ -39,7 +39,7 @@ internal inline fun validate(
  * @param collectionName The name of the parameter that [collection] was an argument for
  * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
  */
-internal inline fun validateSize(
+inline fun validateSize(
         collection: Collection<*>,
         collectionName: String,
         expectedSize: Int,
@@ -54,7 +54,7 @@ internal inline fun validateSize(
  * @param mapName The name of the parameter that [map] was an argument for
  * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
  */
-internal inline fun validateSize(
+inline fun validateSize(
         map: Map<*, *>,
         mapName: String,
         expectedSize: Int,
@@ -67,7 +67,7 @@ internal inline fun validateSize(
  * @param arrayName The name of the parameter that [array] was an argument for
  * @param exceptCtor Defaults to the [IllegalArgumentException] constructor
  */
-internal inline fun validateSize(
+inline fun validateSize(
         array: ByteArray,
         arrayName: String,
         expectedSize: Int,

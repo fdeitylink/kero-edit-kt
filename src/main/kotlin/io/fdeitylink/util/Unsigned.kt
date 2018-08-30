@@ -27,7 +27,8 @@ inline infix fun Byte.shl(shift: Int) = toInt() shl shift
 inline infix fun Byte.shr(shift: Int) = toInt() shr shift
 inline infix fun Byte.ushr(shift: Int) = toInt() ushr shift
 
-infix fun Byte.ucmp(other: Byte) = JByte.compareUnsigned(this, other)
+//infix fun Byte.ucmp(other: Byte) = JByte.compareUnsigned(this, other)
+infix fun Byte.ucmp(other: Byte) = this.toUInt() - other.toUInt()
 infix fun Byte.ult(other: Byte) = this ucmp other < 0
 infix fun Byte.ulte(other: Byte) = this ucmp other <= 0
 infix fun Byte.ugt(other: Byte) = this ucmp other > 0
@@ -40,7 +41,8 @@ inline infix fun Short.shl(shift: Int) = toInt() shl shift
 inline infix fun Short.shr(shift: Int) = toInt() shr shift
 inline infix fun Short.ushr(shift: Int) = toInt() ushr shift
 
-infix fun Short.ucmp(other: Short) = JShort.compareUnsigned(this, other)
+//infix fun Short.ucmp(other: Short) = JShort.compareUnsigned(this, other)
+infix fun Short.ucmp(other: Short) = this.toUInt() - other.toUInt()
 infix fun Short.ult(other: Short) = this ucmp other < 0
 infix fun Short.ulte(other: Short) = this ucmp other <= 0
 infix fun Short.ugt(other: Short) = this ucmp other > 0
